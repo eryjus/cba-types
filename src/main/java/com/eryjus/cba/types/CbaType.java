@@ -174,6 +174,16 @@ abstract class CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------    
+    // abstract assign(String):
+    /**
+     * Perform an assignment from a String value.
+     * 
+     * @param v A String representation of the value to assign to the Cbe Type.
+     */
+    public abstract void assign(String v);
+
+
+    //---------------------------------------------------------------------------------------------------------------    
     // abstract equals():
     /**
      * Inherited from the Object class but made abstract in this class, which will force it to be implemented in child 
@@ -182,6 +192,7 @@ abstract class CbaType {
      * @param o The object against which to compare.
      * @return Whether this element and the supplied object have the same meaning or content.
      */
+    @Override
     public abstract boolean equals(Object o);
 
 
@@ -193,5 +204,6 @@ abstract class CbaType {
      * 
      * @return A string representation of the object.
      */
+    @Override
     public abstract String toString();
 }

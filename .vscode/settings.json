@@ -1,7 +1,14 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "cSpell.words": [
+        "TINYINT",
+        "classpath",
+        "elemview",
         "junit",
-        "signum"
+        "repo",
+        "signum",
+        "tzinfo",
+        "varchar",
+        "zoneinfo"
     ]
 }

@@ -25,6 +25,7 @@ class CbaChar extends CbaCharType {
         value = "";
     }
 
+    public void assign(String v) {}
     public String toString() { return value; }
     public boolean equals(Object o) { return false; }
 }
