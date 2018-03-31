@@ -1,10 +1,10 @@
 //===================================================================================================================
-// CbaInt.java -- This class implements an 32-bit (4-byte) integer.
+// CbaBigInt.java -- This class implements an 64-bit (8-byte) integer.
 //                         
 // -----------------------------------------------------------------------------------------------------------------
 //
 // This class is the concrete implementation of an integer data type.  At its core is Java's class BigInteger, but 
-// the overall number of bits used will be managed to 32-bits on each assignment.
+// the overall number of bits used will be managed to 64-bits on each assignment.
 //
 // -----------------------------------------------------------------------------------------------------------------
 //
@@ -20,22 +20,22 @@ package com.eryjus.cba.types;
 import java.math.BigInteger;
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaInt:
+// class CbaBigInt:
 /**
- * A 32-bit implementation of an integer as represented in MySQL.  While the implementation of this class is the 
+ * A 64-bit implementation of an integer as represented in MySQL.  While the implementation of this class is the 
  * Java class {@code BigInteger}, using  {@code BigInteger} instead of {@code long} is required because Java does not
- * support unsigned primitive integers.  Every time {@link #value} changes the result will be trimmed to 32-bits.
+ * support unsigned primitive integers.  Every time {@link #value} changes the result will be trimmed to 64-bits.
  * 
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaInt extends CbaIntegerType {
+class CbaBigInt extends CbaIntegerType {
     //---------------------------------------------------------------------------------------------------------------
     // private static final BigInteger MIN_UNSIGNED:
     /**
      * The smallest unsigned integer supported.
      */
-    private static final BigInteger MIN_UNSIGNED = new BigInteger("0");
+    private static final BigInteger MIN_UNSIGNED = BigInteger.ZERO;
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -43,7 +43,7 @@ class CbaInt extends CbaIntegerType {
     /**
      * The largest unsigned integer supported.
      */
-    private static final BigInteger MAX_UNSIGNED = new BigInteger("4294967295");
+    private static final BigInteger MAX_UNSIGNED = new BigInteger("2").pow(64).subtract(BigInteger.ONE);
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ class CbaInt extends CbaIntegerType {
     /**
      * The smallest signed integer supported.
      */
-    private static final BigInteger MIN_SIGNED = new BigInteger("-2147483648");
+    private static final BigInteger MIN_SIGNED = new BigInteger("2").pow(63).negate();
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -59,7 +59,7 @@ class CbaInt extends CbaIntegerType {
     /**
      * The largest signed integer supported.
      */
-    private static final BigInteger MAX_SIGNED = new BigInteger("2147483647");
+    private static final BigInteger MAX_SIGNED = new BigInteger("2").pow(63).subtract(BigInteger.ONE).negate();
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -86,7 +86,7 @@ class CbaInt extends CbaIntegerType {
     private final BigInteger MAX_VALUE;
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaInt(String, String, int, boolean, boolean):
+    // CbaBigInt(String, String, int, boolean, boolean):
     /**
      * This constructor will create an instance that is a database field and initialize it to the value "0".
      * 
@@ -96,7 +96,7 @@ class CbaInt extends CbaIntegerType {
      * @param u Is the integer an unsigned integer.
      * @param z Is the integer zero filled.
      */
-    public CbaInt(String tbl, String fld, int sz, boolean u, boolean z) {
+    public CbaBigInt(String tbl, String fld, int sz, boolean u, boolean z) {
         super(tbl, fld, sz, u, z);
         value = BigInteger.ZERO;
 
@@ -111,7 +111,7 @@ class CbaInt extends CbaIntegerType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaInt(int, boolean, boolean):
+    // CbaBigInt(int, boolean, boolean):
     /**
      * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".
      * 
@@ -119,7 +119,7 @@ class CbaInt extends CbaIntegerType {
      * @param u Is the integer an unsigned integer.
      * @param z Is the integer zero filled.
      */
-    public CbaInt(int s, boolean u, boolean z) {
+    public CbaBigInt(int s, boolean u, boolean z) {
         super(s, u, z);
         value = BigInteger.ZERO;
 
@@ -134,14 +134,14 @@ class CbaInt extends CbaIntegerType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaInt(boolean, boolean):
+    // CbaBigInt(boolean, boolean):
     /**
      * This constructor will create an instance that is the default size variable and initialize it to the value "0".
      * 
      * @param u Is the integer an unsigned integer.
      * @param z Is the integer zero filled.
      */
-    public CbaInt(boolean u, boolean z) {
+    public CbaBigInt(boolean u, boolean z) {
         super(CbaIntegerType.DEFAULT_SIZE, u, z);
         value = BigInteger.ZERO;
 
@@ -156,14 +156,14 @@ class CbaInt extends CbaIntegerType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaInt(int):
+    // CbaBigInt(int):
     /**
      * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".  
      * This constructor assumes that the variable is signed and not zero filled.
      * 
      * @param s The maximum number of display digits, which is only used with zero-filled integers.
      */
-    public CbaInt(int s) {
+    public CbaBigInt(int s) {
         super(s, false, false);
         value = BigInteger.ZERO;
         MIN_VALUE = MIN_SIGNED;
@@ -172,12 +172,12 @@ class CbaInt extends CbaIntegerType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaInt():
+    // CbaBigInt():
     /**
      * This constructor will create an instance that is the default size variable and initialize it to the value "0".
      * This constructor assumes that the variable is signed and not zero filled.
      */
-    public CbaInt() {
+    public CbaBigInt() {
         super();
         value = BigInteger.ZERO;
         MIN_VALUE = MIN_SIGNED;
@@ -220,20 +220,21 @@ class CbaInt extends CbaIntegerType {
     //---------------------------------------------------------------------------------------------------------------
     // trim():
     /**
-     * Trim the newly assigned {@link #value} to 32-bits.  This critical function must distinguish between signed  
+     * Trim the newly assigned {@link #value} to 64-bits.  This critical function must distinguish between signed  
      * and unsigned numbers and manage the value properly.
      */
     private void trim() {
         if (isUnsigned()) {
-            value = value.and(new BigInteger("0xffffffff"));
+            value = value.and(new BigInteger("0xffffffffffffffff"));
         } else {
             boolean isNeg = (value.compareTo(BigInteger.ZERO) < 0 ? true : false);
 
-            if (value.and(new BigInteger("0xffffffff")).compareTo(new BigInteger("0x80000000")) == 0) {
-                value = new BigInteger("0x80000000");
+            if (value.and(new BigInteger("0xffffffffffffffff")).
+                        compareTo(new BigInteger("0x8000000000000000")) == 0) {
+                value = new BigInteger("0x8000000000000000");
             } else {
                 if (isNeg) value = value.negate();
-                value = value.and(new BigInteger("0x7fffffff"));
+                value = value.and(new BigInteger("0x7fffffffffffffff"));
                 if (isNeg) value = value.negate();
             }
         }
@@ -311,7 +312,7 @@ class CbaInt extends CbaIntegerType {
             return false;
         }
 
-        return (((CbaInt)o).value.compareTo(value) == 0);
+        return (((CbaBigInt)o).value.compareTo(value) == 0);
     }
 
 

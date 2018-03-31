@@ -372,11 +372,11 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaLongIntValue():
+    // abstract cbaBigIntValue():
     /**
-     * Abstract method to convert this element to a CbaLongInt type, truncating the decimal places.
+     * Abstract method to convert this element to a CbaBigInt type, truncating the decimal places.
      * 
-     * @return The value of this element as a CbaLongInt value, with the decimal places truncated.
+     * @return The value of this element as a CbaBigInt value, with the decimal places truncated.
      */
-    abstract public CbaLongInt cbaLongIntValue();
+    abstract public CbaBigInt cbaBigIntValue();
 }

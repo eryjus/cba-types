@@ -431,13 +431,17 @@ public class CbaDecimal extends CbaFixedPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // cbaLongIntValue():
+    // cbaBigIntValue():
     /**
-     * Convert this value to a new CbaLongInt instance.
+     * Convert this value to a new CbaBigInt instance.
      * 
-     * @return A new instance of the CbaLongInt value of this element.
+     * @return A new instance of the CbaBigInt value of this element.
      */
-    public CbaLongInt cbaLongIntValue() { return new CbaLongInt(longValue()); }
+    public CbaBigInt cbaBigIntValue() { 
+        CbaBigInt rv = new CbaBigInt();
+        rv.assign(toString());
+        return rv; 
+    }
 
 
     //---------------------------------------------------------------------------------------------------------------
