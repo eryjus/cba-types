@@ -65,22 +65,6 @@ abstract class CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaType(CbaType):
-    /**
-     * This is a copy constructor, which might be used when changing data types.  This constructor is starting out
-     * as deprecated so that I can determine if the need is really there or not.
-     *
-     * @param tp A CbaType
-     */
-    @Deprecated
-    protected CbaType(final CbaType tp) {
-        TABLE_NAME = tp.TABLE_NAME;
-        FIELD_NAME = tp.FIELD_NAME;
-        dirty = tp.dirty;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
     // constructor CbaType(String, String):
     /**
      * This is the typical constructor for table columns, saving the table and field name to which this data is 

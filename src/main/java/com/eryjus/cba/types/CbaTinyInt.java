@@ -31,38 +31,6 @@ package com.eryjus.cba.types;
  */
 class CbaTinyInt extends CbaIntegerType {
     //---------------------------------------------------------------------------------------------------------------
-    // private static final long MIN_UNSIGNED:
-    /**
-     * The smallest unsigned integer supported.
-     */
-    private static final long MIN_UNSIGNED = 0;
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // private static final long MAX_UNSIGNED:
-    /**
-     * The largest unsigned integer supported.
-     */
-    private static final long MAX_UNSIGNED = 255;
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // private static final long MIN_SIGNED:
-    /**
-     * The smallest signed integer supported.
-     */
-    private static final long MIN_SIGNED = -128;
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // private static final long MAX_SIGNED:
-    /**
-     * The largest signed integer supported.
-     */
-    private static final long MAX_SIGNED = 127;
-
-
-    //---------------------------------------------------------------------------------------------------------------
     // private long value:
     /**
      * The actual value of the element.
@@ -75,7 +43,7 @@ class CbaTinyInt extends CbaIntegerType {
     /**
      * The minimum value allowed for this particular object.
      */
-    private final long MIN_VALUE;
+    private static final long MIN_VALUE = -128;
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -83,76 +51,49 @@ class CbaTinyInt extends CbaIntegerType {
     /**
      * The maximum value allowed for this particular object.
      */
-    private final long MAX_VALUE;
+    private static final long MAX_VALUE = 127;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(String, String, int, boolean, boolean):
+    // CbaTinyInt(String, String, int, boolean):
     /**
      * This constructor will create an instance that is a database field and initialize it to the value "0".
      * 
      * @param tbl The table name to which this field belongs.
      * @param fld The field name to which this field belongs.
      * @param sz The maximum number of display digits, which is only used with zero-filled integers.
-     * @param u Is the integer an unsigned integer.
      * @param z Is the integer zero filled.
      */
-    public CbaTinyInt(String tbl, String fld, int sz, boolean u, boolean z) {
-        super(tbl, fld, sz, u, z);
+    public CbaTinyInt(String tbl, String fld, int sz, boolean z) {
+        super(tbl, fld, sz, z);
         value = 0;
-
-        if (u) {
-            MIN_VALUE = MIN_UNSIGNED;
-            MAX_VALUE = MAX_UNSIGNED;
-        } else {
-            MIN_VALUE = MIN_SIGNED;
-            MAX_VALUE = MAX_SIGNED;
-        }
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(int, boolean, boolean):
+    // CbaTinyInt(int, boolean):
     /**
      * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".
      * 
      * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     * @param u Is the integer an unsigned integer.
      * @param z Is the integer zero filled.
      */
-    public CbaTinyInt(int s, boolean u, boolean z) {
-        super(s, u, z);
+    public CbaTinyInt(int s, boolean z) {
+        super(s, z);
         value = 0;
-
-        if (u) {
-            MIN_VALUE = MIN_UNSIGNED;
-            MAX_VALUE = MAX_UNSIGNED;
-        } else {
-            MIN_VALUE = MIN_SIGNED;
-            MAX_VALUE = MAX_SIGNED;
-        }
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(boolean, boolean):
+    // CbaTinyInt(boolean):
     /**
      * This constructor will create an instance that is the default size variable and initialize it to the value "0".
      * 
-     * @param u Is the integer an unsigned integer.
      * @param z Is the integer zero filled.
      */
-    public CbaTinyInt(boolean u, boolean z) {
-        super(CbaIntegerType.DEFAULT_SIZE, u, z);
+    public CbaTinyInt(boolean z) {
+        super(CbaIntegerType.DEFAULT_SIZE, z);
         value = 0;
-
-        if (u) {
-            MIN_VALUE = MIN_UNSIGNED;
-            MAX_VALUE = MAX_UNSIGNED;
-        } else {
-            MIN_VALUE = MIN_SIGNED;
-            MAX_VALUE = MAX_SIGNED;
-        }
     }
 
 
@@ -160,15 +101,13 @@ class CbaTinyInt extends CbaIntegerType {
     // CbaTinyInt(int):
     /**
      * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".  
-     * This constructor assumes that the variable is signed and not zero filled.
+     * This constructor assumes that the variable is not zero filled.
      * 
      * @param s The maximum number of display digits, which is only used with zero-filled integers.
      */
     public CbaTinyInt(int s) {
-        super(s, false, false);
+        super(s, false);
         value = 0;
-        MIN_VALUE = MIN_SIGNED;
-        MAX_VALUE = MAX_SIGNED;
     }
 
 
@@ -176,13 +115,11 @@ class CbaTinyInt extends CbaIntegerType {
     // CbaTinyInt():
     /**
      * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * This constructor assumes that the variable is signed and not zero filled.
+     * This constructor assumes that the variable is not zero filled.
      */
     public CbaTinyInt() {
         super();
         value = 0;
-        MIN_VALUE = MIN_SIGNED;
-        MAX_VALUE = MAX_SIGNED;
     }
 
 
@@ -225,18 +162,13 @@ class CbaTinyInt extends CbaIntegerType {
      * unsigned numbers and manage the value properly.
      */
     private void trim() {
-        if (isUnsigned()) {
-            value &= 0xff;
+        if ((value & 0xff) == 0x80) {
+            value = 0x80;
         } else {
             boolean isNeg = (value < 0 ? true : false);
-
-            if ((value & 0xff) == 0x80) {
-                value = 0x80;
-            } else {
-                if (isNeg) value = -value;
-                value &= 0x7f;
-                if (isNeg) value = -value;
-            }
+            if (isNeg) value = -value;
+            value &= 0x7f;
+            if (isNeg) value = -value;
         }
     }
 

@@ -16,9 +16,6 @@
 
 package com.eryjus.cba.types;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.apache.logging.log4j.LogManager;
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -63,7 +60,7 @@ abstract class CbaRealType extends CbaType {
      * The total number of digits allowed for this field/variable instance.  A value less than 0 is unrestricted.  
      * If size is less than 0, {@link CbaRealType#decimals} will also be less than 0.
      */
-    private final int size;
+    private final int SIZE;
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -72,7 +69,7 @@ abstract class CbaRealType extends CbaType {
      * The number of digits to the right of the decimal point allowed for this field/variable.  A value less than 0 
      * is unrestricted.  If decimals is less than 0, {@link CbaRealType#size} will also be less than 0.
      */
-    private final int decimals;
+    private final int DECIMALS;
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -82,40 +79,16 @@ abstract class CbaRealType extends CbaType {
      */
     protected CbaRealType() {
         super();
-        int s = DEFAULT_SIZE;
-        int d = DEFAULT_DECIMALS;
-
-        if (s < d + 1) {
-            size = d + 1;
-            decimals = d;
-        } else {
-            size = s;
-            decimals = d;
-        }
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaRealType(CbaRealType):
-    /**
-     * This is a copy constructor which will be used to transform data types.  This constructor is starting out
-     * as deprecated so that I can determine if the need is really there or not.
-     *
-     * @param rt A CbaRealType
-     */
-    @Deprecated
-    protected CbaRealType(CbaRealType rt) {
-        super(rt);
-        size = rt.size;
-        decimals = rt.decimals;
+        SIZE = UNRESTRICTED;
+        DECIMALS = UNRESTRICTED;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
     // constructor CbaRealType(int, int):
     /**
-     * For a variable class instance, set it's fixed size.  This constructor will manage the {@link CbaRealType#size}
-     * and {@link CbaRealType#decimals} attributes so that both are {@link CbaRealType#UNRESTRICTED} if either s or 
+     * For a variable class instance, set it's fixed size.  This constructor will manage the {@link CbaRealType#SIZE}
+     * and {@link CbaRealType#DECIMALS} attributes so that both are {@link CbaRealType#UNRESTRICTED} if either s or 
      * d are less than 0.
      * 
      * @param s The requested total number of digits in the number.
@@ -125,15 +98,15 @@ abstract class CbaRealType extends CbaType {
         super();
 
         if (s < 0 || d < 0) {
-            size = UNRESTRICTED; 
-            decimals = UNRESTRICTED;
+            SIZE = UNRESTRICTED; 
+            DECIMALS = UNRESTRICTED;
         } else {
             if (s < d + 1) {
-                size = d + 1;
-                decimals = d;
+                SIZE = d + 1;
+                DECIMALS = d;
             } else {
-                size = s;
-                decimals = d;
+                SIZE = s;
+                DECIMALS = d;
             }
         }
     }
@@ -157,15 +130,15 @@ abstract class CbaRealType extends CbaType {
                     "which is not allowed; assuming (" + DEFAULT_SIZE + "," + DEFAULT_DECIMALS + ")",
                     new Exception("Database field cannot be UNRESTRICTED"));
 
-            size = DEFAULT_SIZE;
-            decimals = DEFAULT_DECIMALS;
+            SIZE = DEFAULT_SIZE;
+            DECIMALS = DEFAULT_DECIMALS;
         } else {
             if (s < d + 1) {
-                size = d + 1;
-                decimals = d;
+                SIZE = d + 1;
+                DECIMALS = d;
             } else {
-                size = s;
-                decimals = d;
+                SIZE = s;
+                DECIMALS = d;
             }
         }
     }
@@ -174,11 +147,11 @@ abstract class CbaRealType extends CbaType {
     //---------------------------------------------------------------------------------------------------------------
     // getSize():
     /**
-     * The {@link CbaRealType#size} access method.  
+     * The {@link CbaRealType#SIZE} access method.  
      * 
      * @return The total number of digits for this element, -1 if unrestricted.
      */
-    int getSize() { return size; }
+    int getSize() { return SIZE; }
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -188,67 +161,7 @@ abstract class CbaRealType extends CbaType {
      * 
      * @return The number of digits to the right of the decimal place for this element, -1 if unrestricted.
      */
-    int getDecimals() { return decimals; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(double):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    abstract public void assign(double v);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(BigDecimal):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    abstract public void assign(BigDecimal v);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(long):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    abstract public void assign(long v);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(BigInteger):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    abstract public void assign(BigInteger v);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(CbaRealType):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    abstract public void assign(CbaRealType v);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(CbaIntegerType):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    abstract public void assign(CbaIntegerType v);
+    int getDecimals() { return DECIMALS; }
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -259,124 +172,4 @@ abstract class CbaRealType extends CbaType {
      * @param v The value to which the value of this element will be updated.
      */
     abstract public void assign(String v);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract floatValue():
-    /**
-     * Abstract method to convert this element to a float type.
-     * 
-     * @return The value of this element as a float value.
-     */
-    abstract public float floatValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract doubleValue():
-    /**
-     * Abstract method to convert this element to a double type.
-     * 
-     * @return The value of this element as a double value.
-     */
-    abstract public double doubleValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract bigDecimalValue():
-    /**
-     * Abstract method to convert this element to a BigDecimal type.
-     * 
-     * @return The value of this element as a BigDecimal value.
-     */
-    abstract public BigDecimal bigDecimalValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract intValue():
-    /**
-     * Abstract method to convert this element to a int type, truncating the decimal places.
-     * 
-     * @return The value of this element as a int value, with the decimal places truncated.
-     */
-    abstract public int intValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract longValue():
-    /**
-     * Abstract method to convert this element to a long type, truncating the decimal places.
-     * 
-     * @return The value of this element as a long value, with the decimal places truncated.
-     */
-    abstract public long longValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract bigIntegerValue():
-    /**
-     * Abstract method to convert this element to a BinInteger type, truncating the decimal places.
-     * 
-     * @return The value of this element as a BinInteger value, with the decimal places truncated.
-     */
-    abstract public BigInteger bigIntegerValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaFloatValue():
-    /**
-     * Abstract method to convert this element to a CbaFloat type.
-     * 
-     * @return The value of this element as a CbaFloat value.
-     */
-    abstract public CbaFloat cbaFloatValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaDoubleValue():
-    /**
-     * Abstract method to convert this element to a CbaDouble type.
-     * 
-     * @return The value of this element as a CbaDouble value.
-     */
-    abstract public CbaDouble cbaDoubleValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaTinyIntValue():
-    /**
-     * Abstract method to convert this element to a CbaTinyInt type, truncating the decimal places.
-     * 
-     * @return The value of this element as a CbaTinyInt value, with the decimal places truncated.
-     */
-    abstract public CbaTinyInt cbaTinyIntValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaSmallIntValue():
-    /**
-     * Abstract method to convert this element to a CbaSmallInt type, truncating the decimal places.
-     * 
-     * @return The value of this element as a CbaSmallInt value, with the decimal places truncated.
-     */
-    abstract public CbaSmallInt cbaSmallIntValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaIntValue():
-    /**
-     * Abstract method to convert this element to a CbaInt type, truncating the decimal places.
-     * 
-     * @return The value of this element as a CbaInt value, with the decimal places truncated.
-     */
-    abstract public CbaInt cbaIntValue();
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract cbaBigIntValue():
-    /**
-     * Abstract method to convert this element to a CbaBigInt type, truncating the decimal places.
-     * 
-     * @return The value of this element as a CbaBigInt value, with the decimal places truncated.
-     */
-    abstract public CbaBigInt cbaBigIntValue();
 }

@@ -54,7 +54,7 @@ class CbaBoolean extends CbaTinyInt {
      * as 1 display digit, unsigned, and not zero-filled.
      */
     public CbaBoolean() {
-        super(1, true, false);
+        super(1, false);
     }
 
 
@@ -66,7 +66,7 @@ class CbaBoolean extends CbaTinyInt {
      * @param v The initial value to assign.
      */
     private CbaBoolean(long v) {
-        super(1, true, false);
+        super(1, false);
         assign(v);
     }
 

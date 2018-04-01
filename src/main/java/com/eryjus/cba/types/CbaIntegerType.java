@@ -53,14 +53,6 @@ abstract class CbaIntegerType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private final boolean UNSIGNED:
-    /**
-     * Is this an unsigned integer?
-     */
-    private final boolean UNSIGNED;
-
-
-    //---------------------------------------------------------------------------------------------------------------
     // private final boolean ZERO_FILL:
     /**
      * When outputting this integer, zero fill to the left of the most significant digit until {@link #SIZE} digits 
@@ -77,55 +69,40 @@ abstract class CbaIntegerType extends CbaType {
     protected CbaIntegerType() {
         super();
         SIZE = DEFAULT_SIZE;
-        UNSIGNED = false;
         ZERO_FILL = false;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaIntegerType(int, boolean, boolean):
+    // constructor CbaIntegerType(int, boolean):
     /**
      * Create a variable-like instance with these attributes.  This instance will not be bound to a database field.
      * 
      * @param s The display size when printing this value. See also {@link #SIZE}.
-     * @param u Is the instance an unsigned integer?
      * @param z Is the instance a zero-filled integer? 
      */
-    protected CbaIntegerType(int s, boolean u, boolean z) {
+    protected CbaIntegerType(int s, boolean z) {
         super();
         SIZE = s;
-        UNSIGNED = u;
         ZERO_FILL = z;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaIntegerType(String, String, int, boolean, boolean):
+    // constructor CbaIntegerType(String, String, int, boolean):
     /**
      * Create a database field instance with these attributes.  This instance is bound to a database field.
      * 
      * @param tbl The table to which this field is bound.
      * @param fld The field in the table to which this field is bound.
      * @param s The display size when printing this value. See also {@link #SIZE}.
-     * @param u Is the instance an unsigned integer?
      * @param z Is the instance a zero-filled integer? 
      */
-    protected CbaIntegerType(String tbl, String fld, int s, boolean u, boolean z) {
+    protected CbaIntegerType(String tbl, String fld, int s, boolean z) {
         super(tbl, fld);
         SIZE = s;
-        UNSIGNED = u;
         ZERO_FILL = z;
     }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // isUnsigned():
-    /**
-     * The access method for the {@link #UNSIGNED} attribute.
-     * 
-     * @return Whether this instance is unsigned.
-     */
-    public boolean isUnsigned() { return UNSIGNED; }
 
 
     //---------------------------------------------------------------------------------------------------------------

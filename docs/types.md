@@ -4,20 +4,20 @@ cba Type Class Initial Design
 From the initial thinking laid out in [/journal.md](/journal.md) file, this is the organization of the cba type class structure:
 
 ```
-CbaType (abstract type)
- +- CbaReal (abstract type)
- |   +- CbaFixedPoint (abstract type)
- |   |   +- CbaDecimal
- |   +- CbaFloatingPoint (abstract type)
- |       +- CbaFloat
- |       +- CbaDouble
- +- CbaInteger (abstract type)
- |   +- CbaTinyInt --Done
- |   |   +- CbaBoolean --Done
- |   +- CbaSmallInt --Done
- |   +- CbaMediumInt --Done
- |   +- CbaInteger
- |   +- CbaBigInt
+CbaType (abstract type)                     --Done
+ +- CbaReal (abstract type)                 --Done
+ |   +- CbaFixedPoint (abstract type)       --Done
+ |   |   +- CbaDecimal                      --Done
+ |   +- CbaFloatingPoint (abstract type)    --Done
+ |       +- CbaFloat                        --Done
+ |       +- CbaDouble                       --Done
+ +- CbaInteger (abstract type)              --Done
+ |   +- CbaTinyInt                          --Done
+ |   |   +- CbaBoolean                      --Done
+ |   +- CbaSmallInt                         --Done
+ |   +- CbaMediumInt                        --Done
+ |   +- CbaInteger                          --Done
+ |   +- CbaBigInt                           --Done
  +- CbaCharType (abstract type)
  |   +- CbaChar
  |   +- CbaVarChar
@@ -25,7 +25,7 @@ CbaType (abstract type)
  |   +- CbaText
  |   +- CbaMediumText
  |   +- CbaLongText
- +- CbaBinary (abstract type)
+ +- CbaBinaryType (abstract type)
  |   +- CbaBit
  |   +- CbaBinary
  |   +- CbaVarBinary
@@ -33,11 +33,11 @@ CbaType (abstract type)
  |   +- CbaBlob
  |   +- CbaMediumBlob
  |   +- CbaLongBlob
- +- CbaTemporal (abstract type)
+ +- CbaTemporalType (abstract type)
      +- CbaDate
      +- CbaDateTime
-     +- CbaTimestamp
      +- CbaTime
+     +- CbaTimestamp
 ```
 
 So, this illustrates the hierarchy.

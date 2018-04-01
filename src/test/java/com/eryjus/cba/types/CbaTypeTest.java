@@ -9,23 +9,24 @@ public class CbaTypeTest {
     public void decimalTest0001() {
         CbaDecimal v = new CbaDecimal();
 
-        v.assign(1);
-        assertEquals(1, v.longValue());
+        v.assign("1");
+        assertEquals("1", v.toString());
 
-        v.assign(1.1);
-        assertEquals(1.1, v.doubleValue(), 0.0);
+        v.assign("1.1");
+        assertEquals("1.1", v.toString());
 
-        v.assign(0);
-        assertEquals(0, v.longValue());
+        v.assign(CbaDecimal.ZERO);
+        assertEquals("0.0", v.toString());
 
-        v.assign(0.0);
-        assertEquals(0.0, v.doubleValue(), 0.0);
+        v.assign("0.0");
+        assertEquals("0.0", v.toString());
 
-        v.assign(3.14159);
-        assertEquals(3.14159, v.doubleValue(), 0.0);
+        v.assign("3.14159");
+        assertEquals("3.14159", v.toString());
 
+        v = new CbaDecimal(15, 5);
         v.assign("3.1415926");
-        assertEquals(3.14159, v.doubleValue(), 0.0);
+        assertEquals("3.14159", v.toString());
 
         v.assign("1234567890.12345");
         assertEquals("1234567890.12345", v.toString());
@@ -39,7 +40,7 @@ public class CbaTypeTest {
     public void decimalTest0002() {
         CbaDecimal test = new CbaDecimal(3, 2);
         test.assign("2.3");
-        assertEquals("2.3", test.toString());
+        assertEquals("2.30", test.toString());
 
         test.assign("22.33");
         assertEquals("2.33", test.toString());
@@ -58,11 +59,11 @@ public class CbaTypeTest {
         test.assign("1234");
         assertEquals("82", test.toString());
 
-        test = new CbaTinyInt(true, true);
+        test = new CbaTinyInt(true);
         test.assign("1234");
-        assertEquals("0000000210", test.toString());
+        assertEquals("0000000082", test.toString());
 
-        test = new CbaTinyInt(false, true);
+        test = new CbaTinyInt(true);
         test.assign("-1234");
         assertEquals("-0000000082", test.toString());
 
