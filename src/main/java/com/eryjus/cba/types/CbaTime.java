@@ -57,7 +57,7 @@ class CbaTime extends CbaTemporalType {
     // assign(String)
     /**
      * Assign a new time to this field.  Note that the time must be in the format 
-     * {@link DateTimeFormatter#ISO_LOCAL_TIME}.
+     * {@link java.time.format.DateTimeFormatter#ISO_LOCAL_TIME}.
      * 
      * @param v A string representation of the time to assign properly formatted.
      */

@@ -57,7 +57,7 @@ class CbaDate extends CbaTemporalType {
     // assign(String)
     /**
      * Assign a new date to this field.  Note that the date must be in the format 
-     * {@link DateTimeFormatter#ISO_LOCAL_DATE}.
+     * {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE}.
      * 
      * @param v A string representation of the date to assign properly formatted.
      */

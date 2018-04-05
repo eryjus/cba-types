@@ -60,6 +60,8 @@ class CbaTimestamp extends CbaTemporalType {
     // private initZero():
     /**
      * The Private method specifically to initialize {@link CbaTimestamp#ZERO}.
+     * 
+     * @return A version of CbaTimestamp that is initialized to a 0 timestamp.
      */
 	private static CbaTimestamp initZero() {
         CbaTimestamp rv = new CbaTimestamp();
@@ -82,7 +84,7 @@ class CbaTimestamp extends CbaTemporalType {
     // assign(String)
     /**
      * Assign a new date and time to this field.  Note that the date and time must be in the format 
-     * {@link DateTimeFormatter#ISO_INSTANT}.
+     * {@link java.time.format.DateTimeFormatter#ISO_INSTANT}.
      * 
      * @param v A string representation of the date and time to assign properly formatted.
      */

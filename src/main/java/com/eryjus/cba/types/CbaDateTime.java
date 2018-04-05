@@ -60,6 +60,8 @@ class CbaDateTime extends CbaTemporalType {
     // private initZero():
     /**
      * The Private method specifically to initialize {@link CbaDateTime#ZERO}.
+     * 
+     * @return A CbaDateTime instance of a zero date and time.
      */
     private static CbaDateTime initZero() {
         CbaDateTime rv = new CbaDateTime();
@@ -82,7 +84,7 @@ class CbaDateTime extends CbaTemporalType {
     // assign(String)
     /**
      * Assign a new date and time to this field.  Note that the date and time must be in the format 
-     * {@link DateTimeFormatter#ISO_LOCAL_DATE_TIME}.
+     * {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE_TIME}.
      * 
      * @param v A string representation of the date and time to assign properly formatted.
      */

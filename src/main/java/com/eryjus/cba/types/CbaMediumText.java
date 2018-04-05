@@ -16,6 +16,10 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
+import com.eryjus.cba.sql.Sql;
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // class CbaMediumText:
@@ -25,7 +29,7 @@ package com.eryjus.cba.types;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaMediumText extends CbaVarchar {
+class CbaMediumText extends CbaVarchar implements Sql {
     //---------------------------------------------------------------------------------------------------------------
     // static final int DEFAULT_SIZE:
     /**
@@ -42,8 +46,8 @@ class CbaMediumText extends CbaVarchar {
      * @param tbl The name of the table to which this field is bound.
      * @param fld The name of the field to which this field is bound.
      */
-    public CbaMediumText(String tbl, String fieldName) {
-        super(tbl, fieldName, DEFAULT_SIZE);
+    public CbaMediumText(String tbl, String fld) {
+        super(tbl, fld, DEFAULT_SIZE);
         assign("");
     }
     
@@ -78,5 +82,23 @@ class CbaMediumText extends CbaVarchar {
         }
 
         return (((CbaMediumText)o).toString().equals(toString()));
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+    // toCreateSpec()
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " MEDIUMTEXT";
     }
 }

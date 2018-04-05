@@ -16,6 +16,10 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
+import com.eryjus.cba.sql.Sql;
+
 
 //-------------------------------------------------------------------------------------------------------------------
 // class CbaVarchar:
@@ -25,7 +29,7 @@ package com.eryjus.cba.types;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaVarchar extends CbaCharType {
+class CbaVarchar extends CbaCharType implements Sql {
     //---------------------------------------------------------------------------------------------------------------
     // static final int DEFAULT_SIZE:
     /**
@@ -51,8 +55,8 @@ class CbaVarchar extends CbaCharType {
      * @param fld The name of the field to which this field is bound.
      * @param sz The maximum width of the character field.
      */
-    public CbaVarchar(String tbl, String fieldName, int size) {
-        super(tbl, fieldName, size);
+    public CbaVarchar(String tbl, String fld, int sz) {
+        super(tbl, fld, sz);
         value = "";
     }
     
@@ -65,8 +69,8 @@ class CbaVarchar extends CbaCharType {
      * @param tbl The name of the table to which this field is bound.
      * @param fld The name of the field to which this field is bound.
      */
-    public CbaVarchar(String tbl, String fieldName) {
-        super(tbl, fieldName, DEFAULT_SIZE);
+    public CbaVarchar(String tbl, String fld) {
+        super(tbl, fld, DEFAULT_SIZE);
         value = "";
     }
 
@@ -78,8 +82,8 @@ class CbaVarchar extends CbaCharType {
      * 
      * @param sz The maximum width of the character field.
      */
-    public CbaVarchar(int size) {
-        super(size);
+    public CbaVarchar(int sz) {
+        super(sz);
         value = "";
     }
 
@@ -141,5 +145,23 @@ class CbaVarchar extends CbaCharType {
         }
 
         return (((CbaVarchar)o).value.equals(value));
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+    // toCreateSpec()
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " VARCHAR(" + getSize() + ")";
     }
 }

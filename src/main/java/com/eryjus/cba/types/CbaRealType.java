@@ -31,9 +31,9 @@ abstract class CbaRealType extends CbaType {
     //---------------------------------------------------------------------------------------------------------------
     // UNRESTRICTED:
     /**
-     * This is the value of an unrestricted real number and is used in either {@link CbaRealType#size} and
-     * {@link CbaRealType#decimals}.  It is required that both {@link CbaRealType#size} and 
-     * {@link CbaRealType#decimals} are set to UNRESTRICTED if either are set to this value.
+     * This is the value of an unrestricted real number and is used in either {@link CbaRealType#SIZE} and
+     * {@link CbaRealType#DECIMALS}.  It is required that both {@link CbaRealType#SIZE} and 
+     * {@link CbaRealType#DECIMALS} are set to UNRESTRICTED if either are set to this value.
      */
     protected final static int UNRESTRICTED = -1;
 
@@ -58,7 +58,7 @@ abstract class CbaRealType extends CbaType {
     // size:
     /** 
      * The total number of digits allowed for this field/variable instance.  A value less than 0 is unrestricted.  
-     * If size is less than 0, {@link CbaRealType#decimals} will also be less than 0.
+     * If size is less than 0, {@link CbaRealType#DECIMALS} will also be less than 0.
      */
     private final int SIZE;
 
@@ -67,7 +67,7 @@ abstract class CbaRealType extends CbaType {
     // decimals:
     /**
      * The number of digits to the right of the decimal point allowed for this field/variable.  A value less than 0 
-     * is unrestricted.  If decimals is less than 0, {@link CbaRealType#size} will also be less than 0.
+     * is unrestricted.  If decimals is less than 0, {@link CbaRealType#SIZE} will also be less than 0.
      */
     private final int DECIMALS;
 

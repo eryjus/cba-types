@@ -56,8 +56,8 @@ abstract class CbaCharType extends CbaType {
      * @param fld The name of the field to which this field is bound.
      * @param sz The fixed or maximum width of the character field.
      */
-    public CbaCharType(final String tbl, final String fn, final int sz) { 
-        super(tbl, fn);
+    public CbaCharType(final String tbl, final String fld, final int sz) { 
+        super(tbl, fld);
         SIZE = sz;
     }
 

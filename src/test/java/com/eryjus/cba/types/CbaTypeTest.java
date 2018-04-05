@@ -121,4 +121,18 @@ public class CbaTypeTest {
         CbaDateTime dtm = new CbaDateTime();
         System.out.println(dtm.toString());
     }
+
+    @Test
+    public void SQLTest001() throws Exception {
+        final String  ELEMENTS = "elements";
+        CbaVarchar element_name = new CbaVarchar(ELEMENTS, "element_name", 64);
+        CbaTinyText element_description = new CbaTinyText(ELEMENTS, "element_description");
+
+        String sql = "CREATE TABLE " + ELEMENTS + " (" +
+                element_name.toCreateSpec() + ", " +
+                element_description.toCreateSpec() + 
+            ")";
+
+        System.out.println(sql);
+    }
 }

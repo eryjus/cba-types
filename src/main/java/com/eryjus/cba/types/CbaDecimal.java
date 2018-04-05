@@ -125,12 +125,12 @@ public class CbaDecimal extends CbaFixedPointType {
      * Edit a string representation of a real number into a BigDecimal that conforms to the size and decimals 
      * characteristics of the current object.  In the event that this object is {@link CbaRealType#UNRESTRICTED}, 
      * nothing is done to manage this value.  However, if the number of decimal places is greater then
-     * {@link CbaRealType#size} or the total number of digits overall is greater than {@link CbaRealType#decimals}, 
+     * {@link CbaRealType#SIZE} or the total number of digits overall is greater than {@link CbaRealType#DECIMALS}, 
      * then the value is managed accordingly.  Either decimal places are truncated (not rounded) or the most 
      * significant digits will be removed from the value.  This will be done without throwing an exception.
      * 
      * @param val A string representation of the value to manage to fit in the field 
-     * ({@link CbaRealType#size},{@link CbaRealType#decimals}).
+     * ({@link CbaRealType#SIZE},{@link CbaRealType#DECIMALS}).
      *
      * @return A new copy of a BigDecimal appropriately edited to fit within the constraints of this element.
      */
