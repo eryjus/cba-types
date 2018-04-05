@@ -109,4 +109,16 @@ public class CbaTypeTest {
         assertFalse(CbaBoolean.TRUE.equals(CbaBoolean.FALSE));
         assertTrue(CbaBoolean.TRUE.equals(CbaBoolean.TRUE));
     }
+
+    @Test
+    public void TemporalTest001() {
+        CbaTimestamp ts = new CbaTimestamp();
+        System.out.println(ts.toString());
+
+        CbaDate dt = new CbaDate();
+        System.out.println(dt.toString());
+
+        CbaDateTime dtm = new CbaDateTime();
+        System.out.println(dtm.toString());
+    }
 }

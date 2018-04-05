@@ -1,9 +1,9 @@
 //===================================================================================================================
-// CbaChar.java -- A concrete class for a fixed width character type
+// CbaVarchar.java -- A concrete class for a variable width character type
 //                         
 // -----------------------------------------------------------------------------------------------------------------
 //
-// This class is a fixed width character class.
+// This class is a variable width character class.
 //
 // -----------------------------------------------------------------------------------------------------------------
 //
@@ -18,18 +18,18 @@ package com.eryjus.cba.types;
 
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaChar:
+// class CbaVarchar:
 /**
- * A fixed width character class.
+ * A variable width character class.
  * 
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaChar extends CbaCharType {
+class CbaVarchar extends CbaCharType {
     //---------------------------------------------------------------------------------------------------------------
     // static final int DEFAULT_SIZE:
     /**
-     * The default size of a CbaChar type.
+     * The default size of a CbaVarchar type.
      */
     private static int DEFAULT_SIZE = 1;
 
@@ -43,53 +43,53 @@ class CbaChar extends CbaCharType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaChar(String, String, int):
+    // constructor CbaVarchar(String, String, int):
     /**
-     * Create a new CbaChar that is bound to a table field.
+     * Create a new CbaVarchar that is bound to a table field.
      * 
      * @param tbl The name of the table to which this field is bound.
      * @param fld The name of the field to which this field is bound.
-     * @param sz The fixed width of the character field.
+     * @param sz The maximum width of the character field.
      */
-    public CbaChar(String tbl, String fieldName, int size) {
+    public CbaVarchar(String tbl, String fieldName, int size) {
         super(tbl, fieldName, size);
         value = "";
     }
     
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaChar(String, String):
+    // constructor CbaVarchar(String, String):
     /**
-     * Create a new CbaChar that is bound to a table field.
+     * Create a new CbaVarchar that is bound to a table field.
      * 
      * @param tbl The name of the table to which this field is bound.
      * @param fld The name of the field to which this field is bound.
      */
-    public CbaChar(String tbl, String fieldName) {
+    public CbaVarchar(String tbl, String fieldName) {
         super(tbl, fieldName, DEFAULT_SIZE);
         value = "";
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaChar(int):
+    // constructor CbaVarchar(int):
     /**
-     * Construct a new CbaChar with the indicated size.
+     * Construct a new CbaVarchar with the indicated size.
      * 
-     * @param sz The fixed width of the character field.
+     * @param sz The maximum width of the character field.
      */
-    public CbaChar(int size) {
+    public CbaVarchar(int size) {
         super(size);
         value = "";
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaChar():
+    // constructor CbaVarchar():
     /**
-     * Construct a new CbaChar with the default size.
+     * Construct a new CbaVarchar with the default size.
      */
-    public CbaChar() {
+    public CbaVarchar() {
         super(DEFAULT_SIZE);
         value = "";
     }
@@ -125,7 +125,7 @@ class CbaChar extends CbaCharType {
     //---------------------------------------------------------------------------------------------------------------
     // equals(o):
     /**
-     * Determine equality by returning the equality of {@link CbaChar#value}.  Note that we are not checking 
+     * Determine equality by returning the equality of {@link CbaVarchar#value}.  Note that we are not checking 
      * any table name or field name or size constraints.  Omitting these extra comparisons is relevant since the 
      * a database field will be compared to a variable to see if the values are the same, and they may not be the 
      * exact same type.  We still want to be able to determine that equality.
@@ -140,6 +140,6 @@ class CbaChar extends CbaCharType {
             return false;
         }
 
-        return (((CbaChar)o).value.equals(value));
+        return (((CbaVarchar)o).value.equals(value));
     }
 }

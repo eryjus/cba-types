@@ -1,10 +1,14 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "cSpell.words": [
+        "DATETIME",
+        "LONGBLOB",
+        "LONGTEXT",
         "TINYINT",
         "classpath",
         "elemview",
         "junit",
+        "nano",
         "repo",
         "signum",
         "tzinfo",

@@ -18,13 +18,12 @@ CbaType (abstract type)                     --Done
  |   +- CbaMediumInt                        --Done
  |   +- CbaInteger                          --Done
  |   +- CbaBigInt                           --Done
- +- CbaCharType (abstract type)
- |   +- CbaChar
- |   +- CbaVarChar
- |   +- CbaTinyText
- |   +- CbaText
- |   +- CbaMediumText
- |   +- CbaLongText
+ +- CbaCharType (abstract type)             --Done
+ |   +- CbaChar                             --Done
+ |   +- CbaVarChar                          --Done
+ |   |   +- CbaTinyText                     --Done
+ |   |   +- CbaSmallText                    --Done
+ |   |   +- CbaMediumText                   --Done
  +- CbaBinaryType (abstract type)
  |   +- CbaBit
  |   +- CbaBinary
@@ -32,12 +31,11 @@ CbaType (abstract type)                     --Done
  |   +- CbaTinyBlob
  |   +- CbaBlob
  |   +- CbaMediumBlob
- |   +- CbaLongBlob
- +- CbaTemporalType (abstract type)
-     +- CbaDate
-     +- CbaDateTime
-     +- CbaTime
-     +- CbaTimestamp
+ +- CbaTemporalType (abstract type)         --Done
+     +- CbaDate                             --Done
+     +- CbaDateTime                         --Done
+     +- CbaTime                             --Done
+     +- CbaTimestamp                        --Done
 ```
 
 So, this illustrates the hierarchy.
