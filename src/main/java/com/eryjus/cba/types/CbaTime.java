@@ -17,9 +17,13 @@ package com.eryjus.cba.types;
 
 import java.time.LocalTime;
 
+import org.apache.logging.log4j.LogManager;
+
+import java.sql.SQLException;
+
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaTime:
+
 /**
  * An implementation of the MySQL time field.  This time is handled relative to the local time zone.
  * 
@@ -27,34 +31,67 @@ import java.time.LocalTime;
  * @since v0.1.0
  */
 class CbaTime extends CbaTemporalType {
-    //---------------------------------------------------------------------------------------------------------------
-    // public static final LocalTime ZERO:
     /**
-     * This constant value is used to indicate midnight, which is also a default initialized value of CbaTime.
+     * The builder class for initializing a CbaVarchar element
      */
-    public static final LocalTime ZERO = LocalTime.of(0, 0, 0);
+    public class Builder extends CbaTemporalType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_TIME);
+            setDefaultValue(DEFAULT_VALUE);
+        }
     
     
-    //---------------------------------------------------------------------------------------------------------------
-    // private LocalTime value:
-    /**
-     * This is the value of the CbaTime field.
-     */
-    private LocalTime value;
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaTime():
-    /**
-     * Construct a ZERO time.
-     */
-    public CbaTime() {
-        value = ZERO;
+        
+        /**
+         * Build a CbaTime from the builder setup
+         */
+        public CbaTime build() {
+            return new CbaTime(this);
+        }
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(String)
+
+    /**
+     * The default value for a CbaVarchar.
+     */
+    private static final String DEFAULT_VALUE = "00:00:00";
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * This constant value is used to indicate an uninitialized date.  Note that the date is technically valid.
+     */
+    private static final LocalTime ZERO = LocalTime.parse(DEFAULT_VALUE);
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    private LocalTime value;
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a new CbaVarchar that is bound to a table field.
+     * 
+     * @param builder the builder class to initialize this instance
+     */
+    private CbaTime(Builder builder) {
+        super(builder);
+        clearField();
+    }
+    
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * Assign a new time to this field.  Note that the time must be in the format 
      * {@link java.time.format.DateTimeFormatter#ISO_LOCAL_TIME}.
@@ -62,31 +99,36 @@ class CbaTime extends CbaTemporalType {
      * @param v A string representation of the time to assign properly formatted.
      */
     public void assign(String v) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
         value = LocalTime.parse(v);
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // equals(Object)
+
     /**
      * Test for equality.
      * 
-     * @param o The object against which equality will be determined.
+     * @param obj The object against which equality will be determined.
      * @return Whether Object o is equal to this instance.
      */
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaTime)o).value.equals(value));
+        return (((CbaTime)obj).value.equals(value));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString()
+
     /**
      * Return a string representation of this time in ISO-8601 format.
      * 
@@ -94,5 +136,37 @@ class CbaTime extends CbaTemporalType {
      */
     public String toString() {
         return value.toString();
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " TIME";
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Determine if the value of this instance is equivalent to a ZERO value.  Be warned that a ZERO value is a 
+     * legitimate value for this type, do it must not be used as an indication that the value has not been 
+     * initialized.
+     * 
+     * @return Whether the value of this instance is equivalent to {@link #ZERO}.
+     */
+    public boolean isZero() {
+        return value.equals(ZERO);
     }
 }

@@ -17,11 +17,15 @@
 
 package com.eryjus.cba.types;
 
-import java.time.LocalDateTime;;
+import java.time.LocalDateTime;
+
+import org.apache.logging.log4j.LogManager;
+
+import java.sql.SQLException;
 
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaDateTime:
+
 /**
  * An implementation of the MySQL date and time (DATETIME) field.  This date and time are handled relative to the 
  * local time zone.
@@ -29,27 +33,52 @@ import java.time.LocalDateTime;;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaDateTime extends CbaTemporalType {
+public class CbaDateTime extends CbaTemporalType {
+    /**
+     * The builder class for initializing a CbaVarchar element
+     */
+    public class Builder extends CbaTemporalType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_DATE_TIME);
+            setDefaultValue(DEFAULT_VALUE);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaDateTime from the builder setup
+         */
+        public CbaDateTime build() {
+            return new CbaDateTime(this);
+        }
+    }
+
+
     //---------------------------------------------------------------------------------------------------------------
-    // public static final String ZERO_STRING:
+
     /**
      * This constant String value is used to indicate an uninitialized date and time .  Note that the date and time 
      * are technically valid.
      */
-    private static final String ZERO_STRING = "0000-01-01T00:00:00";
+    private static final String DEFAULT_VALUE = "0000-01-01T00:00:00";
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // public static final CbaDateTime ZERO:
+
     /**
      * This constant value is used to indicate an uninitialized date and time.  Note that the date and time is 
      * technically valid.
      */
-    public static final CbaDateTime ZERO = initZero();
+    public static final LocalDateTime ZERO = LocalDateTime.parse(DEFAULT_VALUE);
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private LocalDateTime value:
+
     /**
      * This is the value of the CbaDateTime field.
      */
@@ -57,31 +86,20 @@ class CbaDateTime extends CbaTemporalType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private initZero():
+
     /**
-     * The Private method specifically to initialize {@link CbaDateTime#ZERO}.
+     * Create a new CbaDateTime that is bound to a table field.
      * 
-     * @return A CbaDateTime instance of a zero date and time.
+     * @param builder the builder class to initialize this instance
      */
-    private static CbaDateTime initZero() {
-        CbaDateTime rv = new CbaDateTime();
-        rv.value = LocalDateTime.parse(ZERO_STRING);
-        return rv;
-	}
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaDateTime():
-    /**
-     * Construct a ZERO date and time.
-     */
-    CbaDateTime() {
-        value = LocalDateTime.parse(ZERO_STRING);
+    private CbaDateTime(Builder builder) {
+        super(builder);
+        clearField();
     }
-
+    
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(String)
+
     /**
      * Assign a new date and time to this field.  Note that the date and time must be in the format 
      * {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE_TIME}.
@@ -89,31 +107,36 @@ class CbaDateTime extends CbaTemporalType {
      * @param v A string representation of the date and time to assign properly formatted.
      */
     public void assign(String v) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
         value = LocalDateTime.parse(v);
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // equals(Object)
+
     /**
      * Test for equality.
      * 
-     * @param o The object against which equality will be determined.
+     * @param obj The object against which equality will be determined.
      * @return Whether Object o is equal to this instance.
      */
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaDateTime)o).value.equals(value));
+        return (((CbaDateTime)obj).value.equals(value));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString()
+
     /**
      * Return a string representation of this date and time in ISO-8601 format.
      * 
@@ -121,5 +144,37 @@ class CbaDateTime extends CbaTemporalType {
      */
     public String toString() {
         return value.toString();
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " DATETIME";
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Determine if the value of this instance is equivalent to a ZERO value.  Be warned that a ZERO value is a 
+     * legitimate value for this type, do it must not be used as an indication that the value has not been 
+     * initialized.
+     * 
+     * @return Whether the value of this instance is equivalent to {@link #ZERO}.
+     */
+    public boolean isZero() {
+        return value.equals(ZERO);
     }
 }

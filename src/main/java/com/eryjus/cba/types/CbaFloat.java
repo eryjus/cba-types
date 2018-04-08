@@ -16,8 +16,13 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
+import org.apache.logging.log4j.LogManager;
+
+
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaFloat:
+
 /**
  * A IEEE float implementation of a real number.  
  * <p>
@@ -28,8 +33,21 @@ package com.eryjus.cba.types;
  * @since v0.1.0
  */
 class CbaFloat extends CbaFloatingPointType {
+    public static class Builder extends CbaFloatingPointType.Builder<Builder> {
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        public CbaFloat build() {
+            return new CbaFloat(this);
+        }
+
+    }
+
     //---------------------------------------------------------------------------------------------------------------
-    // private float value:
+
     /**
      * The actual value of the element.
      */
@@ -37,7 +55,7 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private float minValue:
+
     /**
      * The minimum value allowed for this particular object.
      */
@@ -45,7 +63,7 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private float minValue:
+
     /**
      * The maximum value allowed for this particular object.
      */
@@ -53,49 +71,20 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaFloat(String, String, int, int):
+
     /**
      * This constructor will create an instance that is a database field and initialize it to the value "0".
      * 
-     * @param tbl The table name to which this field belongs.
-     * @param fld The field name to which this field belongs.
-     * @param sz The maximum number of total digits
-     * @param dec Tha maximum number of decimals
+     * @param builder the class from which this instance will be initialized
      */
-    public CbaFloat(String tbl, String fld, int sz, int dec) {
-        super(tbl, fld, sz, dec);
+    public CbaFloat(Builder builder) {
+        super(builder);
         value = 0;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaFloat(int, int):
-    /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".
-     * 
-     * @param s The maximum number of total digits
-     * @param d Tha maximum number of decimals
-     */
-    public CbaFloat(int s, int d) {
-        super(s, d);
-        value = 0;
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaFloat():
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * This constructor assumes that the variable is not zero filled.
-     */
-    public CbaFloat() {
-        super();
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getValue():
     /**
      * The access method for the actual value of this object.
      * 
@@ -107,7 +96,7 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // getMinValue():
+
     /**
      * The access method for the minimum value of this object.
      * 
@@ -117,7 +106,7 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // getMaxValue():
+
     /**
      * The access method for the maximum value of this object.
      * 
@@ -127,19 +116,19 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // trim():
+
     /**
      * Trim the newly assigned {@link #value} to the number of digits and the number of decimal places
      */
     private void trim() {
-        CbaDecimal wrk = new CbaDecimal(getSize(), getDecimals());
+        CbaDecimal wrk = new CbaDecimal.Builder().setSize(getSize(), getDecimals()).build();
         wrk.assign(new Float(value).toString());
         assign(wrk.toString());
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(float):
+
     /**
      * Assign a new float value to {@link #value}.  Then, {@link #trim()} the value and then set the field to be 
      * dirty.
@@ -147,6 +136,11 @@ class CbaFloat extends CbaFloatingPointType {
      * @param v The value to assign.
      */
     public void assign(float v) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
         value = v;
         trim();
         setDirty();
@@ -154,62 +148,34 @@ class CbaFloat extends CbaFloatingPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(String):
+
     /**
      * Assign a new String value to {@link #value}.  This is done by first converting the String to a {@code float}. 
      * Then, {@link #trim()} the value and then set the field to be dirty.
      * 
      * @param v A String representation of the value to assign.
      */
-    @Override
     public void assign(String v) {
         assign(Float.valueOf(v));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(CbaType):
-    /**
-     * Assign a new {@link CbaType} value to {@link #value}.  This is done by first converting the {@link CbaType} 
-     * to a {@link String}.  Then, {@link #trim()} the value and then set the field to be dirty.
-     * 
-     * @param v The CBA value to assign.
-     */
-    public void assign(CbaType v) {
-        assign(v.toString());
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(Number):
-    /**
-     * Assign a new {@link Number} value to {@link #value}.  This is done by first converting the {@link Number} 
-     * to a {@code float}.  Then, {@link #trim()} the value and then set the field to be dirty.
-     * 
-     * @param v The Java numeric value to assign.
-     */
-    public void assign(Number v) {
-        assign(v.floatValue());
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(Object):
     /**
      * Determine equality by comparing the {@link Object} {@code o} to a boxed version of {@link #value}.
      * 
-     * @param o The object to which to compare this instance.
+     * @param obj The object to which to compare this instance.
      * @return Whether this instance and the object are equal.
      */
-    @Override
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaFloat)o).value == value);
+        return (((CbaFloat)obj).value == value);
     }
 
 
@@ -221,8 +187,25 @@ class CbaFloat extends CbaFloatingPointType {
      * 
      * @return A String representation of {@link #value}.
      */
-    @Override
     public String toString() {
         return new Float(value).toString();
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+    // toCreateSpec()
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " FLOAT(" + getSize() + "," + getDecimals() + ")";
     }
 }

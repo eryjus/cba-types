@@ -16,10 +16,8 @@
 
 package com.eryjus.cba.types;
 
-import org.apache.logging.log4j.LogManager;
-
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaRealType:
+
 /**
  * This is the base real number class against which all other types will be defined.  It is intended to define the 
  * minimum requirements for operating on a real number in CBA.
@@ -28,8 +26,24 @@ import org.apache.logging.log4j.LogManager;
  * @since v0.1.0
  */
 abstract class CbaRealType extends CbaType {
+    static abstract class Builder<T extends Builder<T>> extends CbaType.Builder<T> {
+        private int size = DEFAULT_SIZE;
+        private int decimals = DEFAULT_DECIMALS;
+
+
+        /**
+         * Set the size of this instance
+         */
+        public T setSize(int sz, int dec) {
+            size = sz;
+            decimals = dec;
+            return getThis();
+        }
+    }
+
+
     //---------------------------------------------------------------------------------------------------------------
-    // UNRESTRICTED:
+
     /**
      * This is the value of an unrestricted real number and is used in either {@link CbaRealType#SIZE} and
      * {@link CbaRealType#DECIMALS}.  It is required that both {@link CbaRealType#SIZE} and 
@@ -39,7 +53,7 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // DEFAULT_SIZE:
+
     /**
      * The default for the total number of digits allowed for a real number.
      */
@@ -47,7 +61,7 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // DEFAULT_DECIMALS:
+
     /**
      * The default for the number of digits to the right of the decimal place for a real number.
      */
@@ -55,7 +69,7 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // size:
+
     /** 
      * The total number of digits allowed for this field/variable instance.  A value less than 0 is unrestricted.  
      * If size is less than 0, {@link CbaRealType#DECIMALS} will also be less than 0.
@@ -64,7 +78,7 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // decimals:
+
     /**
      * The number of digits to the right of the decimal point allowed for this field/variable.  A value less than 0 
      * is unrestricted.  If decimals is less than 0, {@link CbaRealType#SIZE} will also be less than 0.
@@ -73,79 +87,19 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaRealType():
+
     /**
      * This is the default constructor for a real number.
      */
-    protected CbaRealType() {
-        super();
-        SIZE = UNRESTRICTED;
-        DECIMALS = UNRESTRICTED;
+    CbaRealType(Builder<?> builder) {
+        super(builder);
+        SIZE = builder.size;
+        DECIMALS = builder.decimals ;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaRealType(int, int):
-    /**
-     * For a variable class instance, set it's fixed size.  This constructor will manage the {@link CbaRealType#SIZE}
-     * and {@link CbaRealType#DECIMALS} attributes so that both are {@link CbaRealType#UNRESTRICTED} if either s or 
-     * d are less than 0.
-     * 
-     * @param s The requested total number of digits in the number.
-     * @param d teh requested number of decimal places to the right of the decimal place.
-     */
-    protected CbaRealType(int s, int d) {
-        super();
 
-        if (s < 0 || d < 0) {
-            SIZE = UNRESTRICTED; 
-            DECIMALS = UNRESTRICTED;
-        } else {
-            if (s < d + 1) {
-                SIZE = d + 1;
-                DECIMALS = d;
-            } else {
-                SIZE = s;
-                DECIMALS = d;
-            }
-        }
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaRealType(String, String, int, int):
-    /**
-     * For a field class instance, set it's attributes.
-     *
-     * @param tbl The table name where this data element is stored.
-     * @param fld The field name where this data element is stored.
-     * @param s The total number of digits for the database field.
-     * @param d The number of decimal places to the right of the decimal point for the database field.
-     */
-    protected CbaRealType(String tbl, String fld, int s, int d) {
-        super(tbl, fld);
-
-        if (s < 0 || d < 0) {
-            LogManager.getLogger(CbaRealType.class).warn("Asked for a database field to be UNRESTRICTED, " + 
-                    "which is not allowed; assuming (" + DEFAULT_SIZE + "," + DEFAULT_DECIMALS + ")",
-                    new Exception("Database field cannot be UNRESTRICTED"));
-
-            SIZE = DEFAULT_SIZE;
-            DECIMALS = DEFAULT_DECIMALS;
-        } else {
-            if (s < d + 1) {
-                SIZE = d + 1;
-                DECIMALS = d;
-            } else {
-                SIZE = s;
-                DECIMALS = d;
-            }
-        }
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getSize():
     /**
      * The {@link CbaRealType#SIZE} access method.  
      * 
@@ -155,7 +109,7 @@ abstract class CbaRealType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // getDecimals():
+
     /**
      * The decimals access method.
      * 
@@ -164,12 +118,31 @@ abstract class CbaRealType extends CbaType {
     int getDecimals() { return DECIMALS; }
 
 
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(String):
+        //---------------------------------------------------------------------------------------------------------------
+
     /**
-     * Abstract method to update the value of this element
+     * Assign a new {@link CbaType} value to {@link #value}.  This is done by first converting the {@link CbaType} 
+     * to a {@link String}.  Then, {@link #trim()} the value and then set the field to be dirty.
      * 
-     * @param v The value to which the value of this element will be updated.
+     * @param v The CBA value to assign.
      */
-    abstract public void assign(String v);
+    public void assign(CbaType v) {
+        assign(v.toString());
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Assign a new {@link Number} value to {@link #value}.  This is done by first converting the {@link Number} 
+     * to a {@code float}.  Then, {@link #trim()} the value and then set the field to be dirty.
+     * 
+     * @param v The Java numeric value to assign.
+     */
+    public void assign(Number v) {
+        assign(v.toString());
+    }
+
+
+
 }

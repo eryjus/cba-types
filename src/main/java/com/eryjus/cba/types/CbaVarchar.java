@@ -18,133 +18,90 @@ package com.eryjus.cba.types;
 
 import java.sql.SQLException;
 
-import com.eryjus.cba.sql.Sql;
-
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaVarchar:
+
 /**
  * A variable width character class.
  * 
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaVarchar extends CbaCharType implements Sql {
+public class CbaVarchar extends CbaCharType {
+    /**
+     * The builder class for initializing a CbaVarchar element
+     */
+    public static class Builder extends CbaCharType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_VARCHAR);
+            setSize(DEFAULT_SIZE);
+            setDefaultValue(DEFAULT_VALUE);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaVarchar from the builder setup
+         */
+        public CbaVarchar build() {
+            return new CbaVarchar(this);
+        }
+    }
+
+    
     //---------------------------------------------------------------------------------------------------------------
-    // static final int DEFAULT_SIZE:
+
+    /**
+     * The default value for a CbaVarchar.
+     */
+    private static final String DEFAULT_VALUE = "";
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * The default size of a CbaVarchar type.
      */
-    private static int DEFAULT_SIZE = 1;
+    private static final int DEFAULT_SIZE = 1;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // String value:
-    /**
-     * The actual value of this instance.
-     */
-    private String value;
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaVarchar(String, String, int):
     /**
      * Create a new CbaVarchar that is bound to a table field.
      * 
-     * @param tbl The name of the table to which this field is bound.
-     * @param fld The name of the field to which this field is bound.
-     * @param sz The maximum width of the character field.
+     * @param builder the builder class to initialize this instance
      */
-    public CbaVarchar(String tbl, String fld, int sz) {
-        super(tbl, fld, sz);
-        value = "";
+    CbaVarchar(Builder builder) {
+        super(builder);
+        clearField();
     }
     
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaVarchar(String, String):
-    /**
-     * Create a new CbaVarchar that is bound to a table field.
-     * 
-     * @param tbl The name of the table to which this field is bound.
-     * @param fld The name of the field to which this field is bound.
-     */
-    public CbaVarchar(String tbl, String fld) {
-        super(tbl, fld, DEFAULT_SIZE);
-        value = "";
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaVarchar(int):
-    /**
-     * Construct a new CbaVarchar with the indicated size.
-     * 
-     * @param sz The maximum width of the character field.
-     */
-    public CbaVarchar(int sz) {
-        super(sz);
-        value = "";
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaVarchar():
-    /**
-     * Construct a new CbaVarchar with the default size.
-     */
-    public CbaVarchar() {
-        super(DEFAULT_SIZE);
-        value = "";
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------    
-    // assign(String):
-    /**
-     * Perform an assignment from a String value.
-     * 
-     * @param v A String representation of the value to assign to the Cbe Type.
-     */
-    public void assign(String v) {
-        if (v.length() > getSize()) {
-            value = v.substring(0, getSize());
-        } else  {
-            value = v;
-        }
-        setDirty();
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------    
-    // toString():
-    /**
-     * Convert a CbaChar to a string (rather trivial)
-     * 
-     * @return A trivial return of this value.  Fine value is immutable, this will not cause problems.
-     */
-    public String toString() { return value; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(o):
     /**
      * Determine equality by returning the equality of {@link CbaVarchar#value}.  Note that we are not checking 
      * any table name or field name or size constraints.  Omitting these extra comparisons is relevant since the 
      * a database field will be compared to a variable to see if the values are the same, and they may not be the 
      * exact same type.  We still want to be able to determine that equality.
      * 
-     * @param o The object against which to evaluate equality.
+     * @param obj The object against which to evaluate equality.
      * @return Whether the value and the object represent the same thing.
      */
-    public boolean equals(Object o) { 
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) { 
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaVarchar)o).value.equals(value));
+        return (((CbaVarchar)obj).getValue().equals(getValue()));
     }
 
 

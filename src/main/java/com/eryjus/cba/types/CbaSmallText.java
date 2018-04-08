@@ -18,8 +18,6 @@ package com.eryjus.cba.types;
 
 import java.sql.SQLException;
 
-import com.eryjus.cba.sql.Sql;
-
 
 //-------------------------------------------------------------------------------------------------------------------
 // class CbaSmallText:
@@ -29,9 +27,43 @@ import com.eryjus.cba.sql.Sql;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaSmallText extends CbaVarchar implements Sql {
+public class CbaSmallText extends CbaCharType {
+    /**
+     * The builder class for initializing a CbaVarchar element
+     */
+    public class Builder extends CbaCharType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_SMALL_TEXT);
+            setDefaultValue(DEFAULT_VALUE);
+            setSize(DEFAULT_SIZE);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaVarchar from the builder setup
+         */
+        public CbaSmallText build() {
+            return new CbaSmallText(this);
+        }
+    }
+
+
     //---------------------------------------------------------------------------------------------------------------
-    // static final int DEFAULT_SIZE:
+
+    /**
+     * The default value for a CbaVarchar.
+     */
+    private static final String DEFAULT_VALUE = "";
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * The default size of a CbaSmallText type.
      */
@@ -43,50 +75,38 @@ class CbaSmallText extends CbaVarchar implements Sql {
     /**
      * Create a new CbaSmallText that is bound to a table field.
      * 
-     * @param tbl The name of the table to which this field is bound.
-     * @param fld The name of the field to which this field is bound.
+     * @param builder the builder class to initialize this instance
      */
-    public CbaSmallText(String tbl, String fld) {
-        super(tbl, fld, DEFAULT_SIZE);
-        assign("");
+    private CbaSmallText(Builder builder) {
+        super(builder);
+        clearField();
     }
     
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaSmallText():
-    /**
-     * Construct a new CbaSmallText with the default size.
-     */
-    public CbaSmallText() {
-        super(DEFAULT_SIZE);
-        assign("");
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(o):
     /**
      * Determine equality by returning the equality of {@link CbaVarchar#value}.  Note that we are not checking 
      * any table name or field name or size constraints.  Omitting these extra comparisons is relevant since the 
      * a database field will be compared to a variable to see if the values are the same, and they may not be the 
      * exact same type.  We still want to be able to determine that equality.
      * 
-     * @param o The object against which to evaluate equality.
+     * @param obj The object against which to evaluate equality.
      * @return Whether the value and the object represent the same thing.
      */
-    public boolean equals(Object o) { 
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) { 
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaSmallText)o).toString().equals(toString()));
+        return (((CbaSmallText)obj).toString().equals(toString()));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toCreateSpec()
+
     /**
      * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
      * for this field in the column specifications.

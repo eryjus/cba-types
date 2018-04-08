@@ -17,9 +17,11 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaTinyInt:
+
 /**
  * An 8-bit implementation of an integer as represented in MySQL.  While the implementation of this class is the 
  * Java primitive {@code long}.  Using {@code long} is required because Java does not support unsigned primitive 
@@ -29,250 +31,129 @@ package com.eryjus.cba.types;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaTinyInt extends CbaIntegerType {
-    //---------------------------------------------------------------------------------------------------------------
-    // private long value:
+public class CbaTinyInt extends CbaIntegerType {
     /**
-     * The actual value of the element.
+     * The builder class for initializing a CbaVarchar element
      */
-    private long value;
+    public static class Builder extends CbaIntegerType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_TINY_INT);
+            setSize(DEFAULT_SIZE);
+            setDefaultValue(DEFAULT_VALUE);
+            setMinVal(MIN);
+            setMaxVal(MAX);
+
+        }
 
 
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaTinyInt from the builder setup
+         */
+        public CbaTinyInt build() {
+            return new CbaTinyInt(this);
+        }
+    }
+
+    
     //---------------------------------------------------------------------------------------------------------------
-    // private long minValue:
+
     /**
      * The minimum value allowed for this particular object.
      */
-    private static final long MIN_VALUE = -128;
+    private static final long MIN = -128;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private long minValue:
+
     /**
      * The maximum value allowed for this particular object.
      */
-    private static final long MAX_VALUE = 127;
+    private static final long MAX = 127;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(String, String, int, boolean):
+
     /**
-     * This constructor will create an instance that is a database field and initialize it to the value "0".
+     * Create a new CbaTinyInt that is bound to a table field.
      * 
-     * @param tbl The table name to which this field belongs.
-     * @param fld The field name to which this field belongs.
-     * @param sz The maximum number of display digits, which is only used with zero-filled integers.
-     * @param z Is the integer zero filled.
+     * @param builder the builder class to initialize this instance
      */
-    public CbaTinyInt(String tbl, String fld, int sz, boolean z) {
-        super(tbl, fld, sz, z);
-        value = 0;
+    CbaTinyInt(Builder builder) {
+        super(builder);
+        clearField();
     }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(int, boolean):
-    /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".
-     * 
-     * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     * @param z Is the integer zero filled.
-     */
-    public CbaTinyInt(int s, boolean z) {
-        super(s, z);
-        value = 0;
-    }
-
+    
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(boolean):
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * 
-     * @param z Is the integer zero filled.
-     */
-    public CbaTinyInt(boolean z) {
-        super(CbaIntegerType.DEFAULT_SIZE, z);
-        value = 0;
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt(int):
-    /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".  
-     * This constructor assumes that the variable is not zero filled.
-     * 
-     * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     */
-    public CbaTinyInt(int s) {
-        super(s, false);
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaTinyInt():
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * This constructor assumes that the variable is not zero filled.
-     */
-    public CbaTinyInt() {
-        super();
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getValue():
-    /**
-     * The access method for the actual value of this object.
-     * 
-     * @return The value of this instance
-     */
-    public long getValue() { 
-        return value; 
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getMinValue():
-    /**
-     * The access method for the minimum value of this object.
-     * 
-     * @return The minimum value allowed for this instance
-     */
-    public long getMinValue() { return MIN_VALUE; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getMaxValue():
-    /**
-     * The access method for the maximum value of this object.
-     * 
-     * @return The maximum value allowed for this instance
-     */
-    public long getMaxValue() { return MAX_VALUE; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // trim():
     /**
      * Trim the newly assigned {@link #value} to 8-bits.  This critical function must distinguish between signed and 
      * unsigned numbers and manage the value properly.
      */
-    private void trim() {
-        if ((value & 0xff) == 0x80) {
-            value = 0x80;
+    void trim() {
+        if ((getValue() & 0xff) == 0x80) {
+            setValue(0x80);
         } else {
-            boolean isNeg = (value < 0 ? true : false);
-            if (isNeg) value = -value;
-            value &= 0x7f;
-            if (isNeg) value = -value;
+            boolean isNeg = (getValue() < 0 ? true : false);
+            if (isNeg) setValue(-getValue());
+            setValue(getValue() & 0x7f);
+            if (isNeg) setValue(-getValue());
         }
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(long):
-    /**
-     * Assign a new long value to {@link #value}.  Then, {@link #trim()} the value and then set the field to be 
-     * dirty.
-     * 
-     * @param v The value to assign.
-     */
-    public void assign(long v) {
-        value = v;
-        trim();
-        setDirty();
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(String):
     /**
      * Assign a new String value to {@link #value}.  This is done by first converting the String to a {@code long}. 
      * Then, {@link #trim()} the value and then set the field to be dirty.
      * 
-     * @param v A String representation of the value to assign.
+     * @param val A String representation of the value to assign.
      */
-    @Override
-    public void assign(String v) {
-        assign(Long.valueOf(v));
+    public void assign(String val) {
+        assign(Long.valueOf(val));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(CbaType):
-    /**
-     * Assign a new {@link CbaType} value to {@link #value}.  This is done by first converting the {@link CbaType} 
-     * to a {@code long}.  Then, {@link #trim()} the value and then set the field to be dirty.
-     * 
-     * @param v The CBA value to assign.
-     */
-    public void assign(CbaType v) {
-        assign(v.toString());
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(Number):
-    /**
-     * Assign a new {@link Number} value to {@link #value}.  This is done by first converting the {@link Number} 
-     * to a {@code long}.  Then, {@link #trim()} the value and then set the field to be dirty.
-     * 
-     * @param v The Java numeric value to assign.
-     */
-    public void assign(Number v) {
-        assign(v.longValue());
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(Object):
     /**
      * Determine equality by comparing the {@link Object} {@code o} to a boxed version of {@link #value}.
      * 
-     * @param o The object to which to compare this instance.
+     * @param obj The object to which to compare this instance.
      * @return Whether this instance and the object are equal.
      */
-    @Override
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaTinyInt)o).value == value);
+        return (((CbaTinyInt)obj).getValue() == getValue());
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString():
+
     /**
-     * Convert this value to a string representation, carefully taking care of signed numbers and zero-filled 
-     * numbers.
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
      * 
-     * @return A String representation of {@link #value}.
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
      */
-    @Override
-    public String toString() {
-        String rv = new Long(value).toString();
-
-        if (rv.length() >= getSize() || !isZeroFill()) {
-            return rv;
-        } else if (value < 0) {
-            rv = new Long(-value).toString();
-            String wrk = (ZEROS + rv);
-            rv = "-" + wrk.substring(wrk.length() - getSize());
-
-            return rv;
-        } else {
-            String wrk = (ZEROS + rv);
-            rv = wrk.substring(wrk.length() - getSize());
-
-            return rv;
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
         }
+
+        return getFieldName() + " TINYINT(" + getSize() + ")";
     }
 }

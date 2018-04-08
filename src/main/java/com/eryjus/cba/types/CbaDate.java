@@ -17,9 +17,13 @@ package com.eryjus.cba.types;
 
 import java.time.LocalDate;
 
+import org.apache.logging.log4j.LogManager;
+
+import java.sql.SQLException;
+
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaDate:
+
 /**
  * An implementation of the MySQL date field.  This date is handled relative to the local time zone.
  * 
@@ -27,16 +31,49 @@ import java.time.LocalDate;
  * @since v0.1.0
  */
 class CbaDate extends CbaTemporalType {
+    /**
+     * The builder class for initializing a CbaVarchar element
+     */
+    public class Builder extends CbaTemporalType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_DATE);
+            setDefaultValue(DEFAULT_VALUE);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaDate from the builder setup
+         */
+        public CbaDate build() {
+            return new CbaDate(this);
+        }
+    }
+
+
     //---------------------------------------------------------------------------------------------------------------
-    // public static final LocalDate ZERO:
+
+    /**
+     * The default value for a CbaVarchar.
+     */
+    private static final String DEFAULT_VALUE = "0000-01-01";
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * This constant value is used to indicate an uninitialized date.  Note that the date is technically valid.
      */
-    public static final LocalDate ZERO = LocalDate.of(0, 1, 1);
+    private static final LocalDate ZERO = LocalDate.parse(DEFAULT_VALUE);
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private LocalDate value:
+
     /**
      * This is the value of the CbaDate field.
      */
@@ -44,49 +81,57 @@ class CbaDate extends CbaTemporalType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaDate():
-    /**
-     * Construct a ZERO date.
-     */
-    public CbaDate() {
-        value = ZERO;
-    }
 
+    /**
+     * Create a new CbaVarchar that is bound to a table field.
+     * 
+     * @param builder the builder class to initialize this instance
+     */
+    private CbaDate(Builder builder) {
+        super(builder);
+        clearField();
+    }
+    
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(String)
+
     /**
      * Assign a new date to this field.  Note that the date must be in the format 
      * {@link java.time.format.DateTimeFormatter#ISO_LOCAL_DATE}.
      * 
-     * @param v A string representation of the date to assign properly formatted.
+     * @param val A string representation of the date to assign properly formatted.
      */
-    public void assign(String v) {
-        value = LocalDate.parse(v);
+    public void assign(String val) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
+        value = LocalDate.parse(val);
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // equals(Object)
+
     /**
      * Test for equality.
      * 
-     * @param o The object against which equality will be determined.
+     * @param obj The object against which equality will be determined.
      * @return Whether Object o is equal to this instance.
      */
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaDate)o).value.equals(value));
+        return (((CbaDate)obj).value.equals(value));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString()
+
     /**
      * Return a string representation of this date in ISO-8601 format.
      * 
@@ -94,5 +139,37 @@ class CbaDate extends CbaTemporalType {
      */
     public String toString() {
         return value.toString();
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " DATE";
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Determine if the value of this instance is equivalent to a ZERO value.  Be warned that a ZERO value is a 
+     * legitimate value for this type, do it must not be used as an indication that the value has not been 
+     * initialized.
+     * 
+     * @return Whether the value of this instance is equivalent to {@link #ZERO}.
+     */
+    public boolean isZero() {
+        return value.equals(ZERO);
     }
 }

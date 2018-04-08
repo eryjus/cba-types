@@ -1,5 +1,5 @@
 //===================================================================================================================
-// CbaDateTime.java -- This class is an abstract class for the cba date and time combined, with microsecond accuracy.
+// CbaTimestamp.java -- This class is an abstract class for the cba date and time combined, with microsecond accuracy.
 // -----------------------------------------------------------------------------------------------------------------
 //
 // The CbaDate type closely aligns with the MySQL DATETIME data type.  This type differs from the 
@@ -19,9 +19,13 @@ package com.eryjus.cba.types;
 
 import java.time.Instant;
 
+import org.apache.logging.log4j.LogManager;
+
+import java.sql.SQLException;
+
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaDateTime:
+
 /**
  * An implementation of the MySQL date and time (DATETIME) field.  This date and time are handled relative to the 
  * UTC.
@@ -29,27 +33,52 @@ import java.time.Instant;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaTimestamp extends CbaTemporalType {
+public class CbaTimestamp extends CbaTemporalType {
+    /**
+     * The builder class for initializing a CbaVarchar element
+     */
+    public static class Builder extends CbaTemporalType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_TIMESTAMP);
+            setDefaultValue(DEFAULT_VALUE);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaTimestamp from the builder setup
+         */
+        public CbaTimestamp build() {
+            return new CbaTimestamp(this);
+        }
+    }
+
+
     //---------------------------------------------------------------------------------------------------------------
-    // public static final String ZERO_STRING:
+
     /**
      * This constant String value is used to indicate an uninitialized date adn time .  Note that the date and time 
      * are technically valid.
      */
-    private static final String ZERO_STRING = "0000-01-01T00:00:00.000000Z";
+    private static final String DEFAULT_VALUE = "0000-01-01T00:00:00.000000Z";
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // public static final CbaTimestamp ZERO:
+
     /**
      * This constant value is used to indicate an uninitialized date and time.  Note that the date and time is
      *  technically valid.
      */
-    public static final CbaTimestamp ZERO = initZero();
+    public static final Instant ZERO = Instant.parse(DEFAULT_VALUE);
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private Instant value:
+
     /**
      * This is the value of the CbaTimestamp field.
      */
@@ -57,31 +86,20 @@ class CbaTimestamp extends CbaTemporalType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private initZero():
+
     /**
-     * The Private method specifically to initialize {@link CbaTimestamp#ZERO}.
+     * Create a new CbaTimestamp that is bound to a table field.
      * 
-     * @return A version of CbaTimestamp that is initialized to a 0 timestamp.
+     * @param builder the builder class to initialize this instance
      */
-	private static CbaTimestamp initZero() {
-        CbaTimestamp rv = new CbaTimestamp();
-        rv.value = Instant.parse(ZERO_STRING);
-        return rv;
-	}
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaTimestamp():
-    /**
-     * Construct a ZERO date and time in UTC.
-     */
-    CbaTimestamp() {
-        value = Instant.parse(ZERO_STRING);;
+    private CbaTimestamp(Builder builder) {
+        super(builder);
+        clearField();
     }
-
+    
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(String)
+
     /**
      * Assign a new date and time to this field.  Note that the date and time must be in the format 
      * {@link java.time.format.DateTimeFormatter#ISO_INSTANT}.
@@ -89,31 +107,36 @@ class CbaTimestamp extends CbaTemporalType {
      * @param v A string representation of the date and time to assign properly formatted.
      */
     public void assign(String v) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
         value = Instant.parse(v);
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // equals(Object)
+
     /**
      * Test for equality.
      * 
-     * @param o The object against which equality will be determined.
+     * @param obj The object against which equality will be determined.
      * @return Whether Object o is equal to this instance.
      */
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaTimestamp)o).value.equals(value));
+        return (((CbaTimestamp)obj).value.equals(value));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString()
+
     /**
      * Return a string representation of this date and time in ISO-8601 format.
      * 
@@ -126,5 +149,37 @@ class CbaTimestamp extends CbaTemporalType {
         nano = nano.substring(nano.length() - 6);
 
         return rv + "." + nano + "Z";
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " DATETIME";
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Determine if the value of this instance is equivalent to a ZERO value.  Be warned that a ZERO value is a 
+     * legitimate value for this type, do it must not be used as an indication that the value has not been 
+     * initialized.
+     * 
+     * @return Whether the value of this instance is equivalent to {@link #ZERO}.
+     */
+    public boolean isZero() {
+        return value.equals(ZERO);
     }
 }

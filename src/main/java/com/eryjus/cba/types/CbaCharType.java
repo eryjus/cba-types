@@ -16,9 +16,10 @@
 
 package com.eryjus.cba.types;
 
+import org.apache.logging.log4j.LogManager;
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaCharType:
+
 /**
  * An abstraction of a character type in Cba.
  * 
@@ -26,59 +27,101 @@ package com.eryjus.cba.types;
  * @since v0.1.0
  */
 abstract class CbaCharType extends CbaType {
-    //---------------------------------------------------------------------------------------------------------------
-    // final int SIZE:
+    @SuppressWarnings("unchecked")
+    public static abstract class Builder<T extends Builder<T>> extends CbaType.Builder<T> {
+        int size;
+
+        public T setSize(int sz) { 
+            size = sz;
+            return (T)this;
+        }
+    }
+
     /**
      * The width of the field, be that a fixed width or a variable width.
      */
-    protected final int SIZE;
+    private final int SIZE;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaCharType(int):
+
+    /**
+     * The actual value of this instance.
+     */
+    private String value;
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * Construct a new CbaCharType with the indicated size.
      * 
-     * @param sz The fixed or maximum width of the character field.
+     * @param builder The builder class to initialize this class
      */
-    public CbaCharType(final int sz) {
-        super();
-        SIZE = sz;
+    CbaCharType(Builder<?> builder) {
+        super(builder);
+        SIZE = builder.size;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaCharType(String, String, int):
-    /**
-     * Construct a new CbaCharType bound to a table with the indicated size.
-     * 
-     * @param tbl The name of the table to which this field is bound.
-     * @param fld The name of the field to which this field is bound.
-     * @param sz The fixed or maximum width of the character field.
-     */
-    public CbaCharType(final String tbl, final String fld, final int sz) { 
-        super(tbl, fld);
-        SIZE = sz;
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getSize():
     /**
      * The access method for the {@link #SIZE} attribute.
      * 
      * @return The minimum display size for this instance.  See also {@link #SIZE}.
      */
-    public int getSize() { return SIZE; }
+    final public int getSize() { return SIZE; }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The access method for the {@link #value} attribute.
+     * 
+     * @return The minimum display size for this instance.  See also {@link #SIZE}.
+     */
+    final public String getValue() { return value; }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The access method for the {@link #value} attribute.
+     * 
+     * @param val The minimum display size for this instance.  See also {@link #SIZE}.
+     */
+    final public void setValue(String val) { value = val; }
+
+        
+    //---------------------------------------------------------------------------------------------------------------    
+
+    /**
+     * Convert a CbaVarchar to a string (rather trivial)
+     * 
+     * @return A trivial return of this value.  Fine value is immutable, this will not cause problems.
+     */
+    final public String toString() { return value; }
 
 
     //---------------------------------------------------------------------------------------------------------------    
-    // abstract assign(String):
+
     /**
      * Perform an assignment from a String value.
      * 
-     * @param v A String representation of the value to assign to the Cbe Type.
+     * @param val A String representation of the value to assign to the Cbe Type.
      */
-    @Override
-    abstract public void assign(String v);
+    public void assign(String val) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
+        if (val.length() > getSize()) {
+            setValue(val.substring(0, getSize()));
+        } else  {
+            setValue(val);
+        }
+        setDirty();
+    }
 }

@@ -21,6 +21,7 @@ package com.eryjus.cba.types;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 
@@ -32,16 +33,35 @@ import org.apache.logging.log4j.LogManager;
  * of interacting with the decimal value making sure it fits with the constraints.
  */
 public class CbaDecimal extends CbaFixedPointType {
+    public static class Builder extends CbaFixedPointType.Builder<Builder> {
+        public CbaDecimal build() {
+            return new CbaDecimal(this);
+        }
+
+        
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        CbaDecimal build(String value) {
+            CbaDecimal rv = build();
+            rv.assign(value);
+            return rv;
+        }
+    }
+
     //---------------------------------------------------------------------------------------------------------------
-    // static final ZERO:
+
     /**
      * This is a constant value for a ZERO value expressed as a {@link CbaDecimal}.
      */
-    public static final CbaDecimal ZERO = new CbaDecimal("0.0");
+    public static final CbaDecimal ZERO = new CbaDecimal.Builder().build("0.0");
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // value:
+
     /**
      * The actual value of this CbaDecimal.  While the implementation is a core Java class, this class managed its 
      * value within the constraints for this type.
@@ -50,77 +70,18 @@ public class CbaDecimal extends CbaFixedPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaDecimal:
+
     /**
      * The default constructor for a CbaDecimal element, initializing the value to ZERO.
      */
-    CbaDecimal() {
-        super();
+    CbaDecimal(Builder builder) {
+        super(builder);
         value = new BigDecimal(0.0);
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private constructor CbaDecimal(String):
-    /**
-     * This is a copy constructor for String value.
-     * 
-     * @param rv The real type element value to copy.
-     */
-    private CbaDecimal(String rv) {
-        super();
-        assign(rv);
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaDecimal(CbaType):
-    /**
-     * This is a copy constructor for any {@link CbaType}.
-     * 
-     * @param rv The real type element value to copy.
-     */
-    CbaDecimal(CbaType rv) {
-        super();
-        assign(rv.toString());
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaDecimal(int, int):
-    /**
-     * For a variable class instance, create an object and set it's fixed size.
-     * 
-     * @param s The total number of digits in the CbaDecimal, or {@link CbaRealType#UNRESTRICTED} if unrestricted.
-     * @param d The number of digits to the right of the decimal place in the CbaDecimal, or 
-     * {@link CbaRealType#UNRESTRICTED} if unrestricted.
-     */
-   CbaDecimal(int s, int d) {
-        super(s, d);
-        value = new BigDecimal(0.0);
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaDecimal(String, String, int, int):
-    /**
-     * For a field class instance, create an object, bind it to its database table and column name and set it's fixed 
-     * size.
-     * 
-     * @param tbl The name of the table holding this value in the database.
-     * @param fld THe name of the field holding this value in the database.
-     * @param s The total number of digits in the CbaDecimal, or {@link CbaRealType#UNRESTRICTED} if unrestricted.
-     * @param d The number of digits to the right of the decimal place in the CbaDecimal, or 
-     * {@link CbaRealType#UNRESTRICTED} if unrestricted.
-     */
-    CbaDecimal(String tbl, String fld, int s, int d) {
-        super(tbl, fld, s, d);
-        value = new BigDecimal(0.0);
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // editedBigDecimal(String):
     /**
      * Edit a string representation of a real number into a BigDecimal that conforms to the size and decimals 
      * characteristics of the current object.  In the event that this object is {@link CbaRealType#UNRESTRICTED}, 
@@ -150,7 +111,7 @@ public class CbaDecimal extends CbaFixedPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(String):
+
     /**
      * Assign a new String value to this element.  This function edits it to fit in this element's size restrictions 
      * (if any).  Finally the value is updated with a new BigDecimal instance.
@@ -158,28 +119,18 @@ public class CbaDecimal extends CbaFixedPointType {
      * @param v the new value to assign
      */
     public void assign(String v) { 
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
         value = editedBigDecimal(v); 
         setDirty();
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(CbaType):
-    /**
-     * Assign a new CbaRealType value to this element.  This function first converts this new value to a String and 
-     * then edits it to fit in this element's size restrictions (if any).  Finally the value is updated with a new 
-     * BigDecimal instance.
-     * 
-     * @param v the new value to assign
-     */
-    public void assign(CbaType v) { 
-        value = editedBigDecimal(v.toString()); 
-        setDirty();
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // toString():
     /**
      * Create a string representation of this element.
      * 
@@ -189,23 +140,41 @@ public class CbaDecimal extends CbaFixedPointType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // equals(o):
+
     /**
      * Determine equality by returning the equality of {@link CbaDecimal#value}.  Note that we are not checking 
      * any table name or field name or size constraints.  Omitting these extra comparisons is relevant since the 
      * a database field will be compared to a variable to see if the values are the same, and they may not be the 
      * exact same type.  We still want to be able to determine that equality.
      * 
-     * @param o The object against which to evaluate equality.
+     * @param obj The object against which to evaluate equality.
      * @return Whether the value and the object represent the same thing.
      */
-    public boolean equals(Object o) { 
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) { 
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaDecimal)o).value.equals(value));
+        return (((CbaDecimal)obj).value.equals(value));
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " DECIMAL(" + getSize() + "," + getDecimals() + ")";
     }
 }

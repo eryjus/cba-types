@@ -17,9 +17,11 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaMediumInt:
+
 /**
  * A 24-bit implementation of an integer as represented in MySQL.  While the implementation of this class is the 
  * Java primitive {@code long}.  Using {@code long} is required because Java does not support unsigned primitive 
@@ -29,130 +31,63 @@ package com.eryjus.cba.types;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaMediumInt extends CbaIntegerType {
-    //---------------------------------------------------------------------------------------------------------------
-    // private long value:
+public class CbaMediumInt extends CbaIntegerType {
     /**
-     * The actual value of the element.
+     * This is the builder class for a small integer
      */
-    private long value;
+    static class Builder extends CbaIntegerType.Builder<Builder> {
+        Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_SMALL_INT);
+            setSize(DEFAULT_SIZE);
+            setDefaultValue(DEFAULT_VALUE);
+            setMinVal(MIN);
+            setMaxVal(MAX);
+
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaTinyInt from the builder setup
+         */
+        public CbaMediumInt build() {
+            return new CbaMediumInt(this);
+        }
+    }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private long minValue:
+
     /**
      * The minimum value allowed for this particular object.
      */
-    private static final long MIN_VALUE = -8388608;
+    private static final long MIN = -8388608;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private long minValue:
+
     /**
      * The maximum value allowed for this particular object.
      */
-    private static final long MAX_VALUE = 8388607;
+    private static final long MAX = 8388607;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(String, String, int, boolean):
+
     /**
      * This constructor will create an instance that is a database field and initialize it to the value "0".
      * 
-     * @param tbl The table name to which this field belongs.
-     * @param fld The field name to which this field belongs.
-     * @param sz The maximum number of display digits, which is only used with zero-filled integers.
-     * @param z Is the integer zero filled.
+     * @param builder the class with all the required setup values
      */
-    public CbaMediumInt(String tbl, String fld, int sz, boolean z) {
-        super(tbl, fld, sz, z);
-        value = 0;
+    public CbaMediumInt(Builder builder) {
+        super(builder);
+        setValue(0);
     }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(int, boolean):
-    /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".
-     * 
-     * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     * @param z Is the integer zero filled.
-     */
-    public CbaMediumInt(int s, boolean z) {
-        super(s, z);
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(boolean):
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * 
-     * @param z Is the integer zero filled.
-     */
-    public CbaMediumInt(boolean z) {
-        super(CbaIntegerType.DEFAULT_SIZE, z);
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(int):
-    /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".  
-     * This constructor assumes that the variable is not zero filled.
-     * 
-     * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     */
-    public CbaMediumInt(int s) {
-        super(s, false);
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt():
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * This constructor assumes that the variable is not zero filled.
-     */
-    public CbaMediumInt() {
-        super();
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getValue():
-    /**
-     * The access method for the actual value of this object.
-     * 
-     * @return The value of this instance
-     */
-    public long getValue() { 
-        return value; 
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getMinValue():
-    /**
-     * The access method for the minimum value of this object.
-     * 
-     * @return The minimum value allowed for this instance
-     */
-    public long getMinValue() { return MIN_VALUE; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getMaxValue():
-    /**
-     * The access method for the maximum value of this object.
-     * 
-     * @return The maximum value allowed for this instance
-     */
-    public long getMaxValue() { return MAX_VALUE; }
 
 
     //---------------------------------------------------------------------------------------------------------------
@@ -161,118 +96,64 @@ class CbaMediumInt extends CbaIntegerType {
      * Trim the newly assigned {@link #value} to 24-bits.  This critical function must distinguish between signed  
      * and unsigned numbers and manage the value properly.
      */
-    private void trim() {
-        if ((value & 0xffffff) == 0x800000) {
-            value = 0x800000;
+    void trim() {
+        if ((getValue() & 0xffffff) == 0x800000) {
+            setValue(0x800000);
         } else {
-            boolean isNeg = (value < 0 ? true : false);
-            if (isNeg) value = -value;
-            value &= 0x7fffff;
-            if (isNeg) value = -value;
+            boolean isNeg = (getValue() < 0 ? true : false);
+            if (isNeg) setValue(-getValue());
+            setValue(getValue() & 0x7fffff);
+            if (isNeg) setValue(-getValue());
         }
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(long):
-    /**
-     * Assign a new long value to {@link #value}.  Then, {@link #trim()} the value and then set the field to be 
-     * dirty.
-     * 
-     * @param v The value to assign.
-     */
-    public void assign(long v) {
-        value = v;
-        trim();
-        setDirty();
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(String):
     /**
      * Assign a new String value to {@link #value}.  This is done by first converting the String to a {@code long}. 
      * Then, {@link #trim()} the value and then set the field to be dirty.
      * 
      * @param v A String representation of the value to assign.
      */
-    @Override
-    public void assign(String v) {
+     public void assign(String v) {
         assign(Long.valueOf(v));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(CbaType):
-    /**
-     * Assign a new {@link CbaType} value to {@link #value}.  This is done by first converting the {@link CbaType} 
-     * to a {@code long}.  Then, {@link #trim()} the value and then set the field to be dirty.
-     * 
-     * @param v The CBA value to assign.
-     */
-    public void assign(CbaType v) {
-        assign(v.toString());
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(Number):
-    /**
-     * Assign a new {@link Number} value to {@link #value}.  This is done by first converting the {@link Number} 
-     * to a {@code long}.  Then, {@link #trim()} the value and then set the field to be dirty.
-     * 
-     * @param v The Java numeric value to assign.
-     */
-    public void assign(Number v) {
-        assign(v.longValue());
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(Object):
     /**
      * Determine equality by comparing the {@link Object} {@code o} to a boxed version of {@link #value}.
      * 
-     * @param o The object to which to compare this instance.
+     * @param obj The object to which to compare this instance.
      * @return Whether this instance and the object are equal.
      */
-    @Override
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaMediumInt)o).value == value);
+        return (((CbaMediumInt)obj).getValue() == getValue());
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString():
+
     /**
-     * Convert this value to a string representation, carefully taking care of signed numbers and zero-filled 
-     * numbers.
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
      * 
-     * @return A String representation of {@link #value}.
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
      */
-    @Override
-    public String toString() {
-        String rv = new Long(value).toString();
-
-        if (rv.length() >= getSize() || !isZeroFill()) {
-            return rv;
-        } else if (value < 0) {
-            rv = new Long(-value).toString();
-            String wrk = (ZEROS + rv);
-            rv = "-" + wrk.substring(wrk.length() - getSize());
-
-            return rv;
-        } else {
-            String wrk = (ZEROS + rv);
-            rv = wrk.substring(wrk.length() - getSize());
-
-            return rv;
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
         }
+
+        return getFieldName() + " MEDIUMINT(" + getSize() + ")";
     }
 }

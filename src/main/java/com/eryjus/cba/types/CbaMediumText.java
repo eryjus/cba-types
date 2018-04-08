@@ -18,8 +18,6 @@ package com.eryjus.cba.types;
 
 import java.sql.SQLException;
 
-import com.eryjus.cba.sql.Sql;
-
 
 //-------------------------------------------------------------------------------------------------------------------
 // class CbaMediumText:
@@ -29,64 +27,86 @@ import com.eryjus.cba.sql.Sql;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaMediumText extends CbaVarchar implements Sql {
-    //---------------------------------------------------------------------------------------------------------------
-    // static final int DEFAULT_SIZE:
+class CbaMediumText extends CbaCharType {
     /**
-     * The default size of a CbaMediumText type.
+     * The builder class for initializing a CbaCharType element
+     */
+    public class Builder extends CbaCharType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_MEDIUM_TEXT);
+            setDefaultValue(DEFAULT_VALUE);
+            setSize(DEFAULT_SIZE);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaCharType from the builder setup
+         */
+        public CbaMediumText build() {
+            return new CbaMediumText(this);
+        }
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The default value for a CbaMediumText.
+     */
+    private static final String DEFAULT_VALUE = "";
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The default size of a CbaVarchar type.
      */
     private static int DEFAULT_SIZE = 16777215;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaMediumText(String, String):
+
     /**
-     * Create a new CbaMediumText that is bound to a table field.
+     * Create a new CbaTinyText that is bound to a table field.
      * 
-     * @param tbl The name of the table to which this field is bound.
-     * @param fld The name of the field to which this field is bound.
+     * @param builder the builder class to initialize this instance
      */
-    public CbaMediumText(String tbl, String fld) {
-        super(tbl, fld, DEFAULT_SIZE);
-        assign("");
+    private CbaMediumText(Builder builder) {
+        super(builder);
+        clearField();
     }
     
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaMediumText():
-    /**
-     * Construct a new CbaMediumText with the default size.
-     */
-    public CbaMediumText() {
-        super(DEFAULT_SIZE);
-        assign("");
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(o):
     /**
      * Determine equality by returning the equality of {@link CbaVarchar#value}.  Note that we are not checking 
      * any table name or field name or size constraints.  Omitting these extra comparisons is relevant since the 
      * a database field will be compared to a variable to see if the values are the same, and they may not be the 
      * exact same type.  We still want to be able to determine that equality.
      * 
-     * @param o The object against which to evaluate equality.
+     * @param obj The object against which to evaluate equality.
      * @return Whether the value and the object represent the same thing.
      */
-    public boolean equals(Object o) { 
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) { 
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaMediumText)o).toString().equals(toString()));
+        return (((CbaMediumText)obj).toString().equals(toString()));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toCreateSpec()
+
     /**
      * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
      * for this field in the column specifications.

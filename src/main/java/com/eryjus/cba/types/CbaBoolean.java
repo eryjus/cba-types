@@ -16,11 +16,13 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
 import org.apache.logging.log4j.LogManager;
 
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaBoolean:
+
 /**
  * A specialization of the {@link CbaTinyInt} class to hold boolean values.  MySQL implements boolean as 
  * {@code TINYINT(1)} and this class is a similar specialization.  Derived from {@link CbaTinyInt}, CbaBoolean sets 
@@ -30,60 +32,81 @@ import org.apache.logging.log4j.LogManager;
  * @author Adam Clark
  * @since v0.1.0
  */
-class CbaBoolean extends CbaTinyInt {
+public class CbaBoolean extends CbaIntegerType {
+    /**
+     * The builder class for initializing a CbaVarchar element
+     */
+    public static class Builder extends CbaIntegerType.Builder<Builder> {
+        public Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_BOOLEAN);
+            setMinVal(0);
+            setMaxVal(1);
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaBoolean from the builder setup
+         */
+        public CbaBoolean build() {
+            return new CbaBoolean(this);
+        }
+
+
+        /**
+         * Build a CbaBoolean from the builder setup and assign a default value
+         */
+        CbaBoolean build(String val) {
+            CbaBoolean rv = new CbaBoolean(this);
+            rv.assign(val);
+            return rv;
+        }
+
+    }
+
+    
     //---------------------------------------------------------------------------------------------------------------
-    // static final FALSE:
+
     /**
      * The constant value of FALSE.
      */
-    public static final CbaBoolean FALSE = new CbaBoolean(0);
+    public static final CbaBoolean FALSE = new Builder().build("FALSE");
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // static final TRUE:
+
     /**
      * The constant value of TRUE.
      */
-    public static final CbaBoolean TRUE = new CbaBoolean(1);
+    public static final CbaBoolean TRUE = new Builder().build("TRUE");
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaBoolean()
-    /**
-     * The default constructor for CbaBoolean.  The constructor ensures that the {@link CbaTinyInt} is initialized
-     * as 1 display digit, unsigned, and not zero-filled.
-     */
-    public CbaBoolean() {
-        super(1, false);
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // private constructor CbaBoolean(long)
     /**
-     * The private constructor is used to initialize the constant values {@link #FALSE} and {@link #TRUE}.
+     * Create a new CbaBoolean that is bound to a table field.
      * 
-     * @param v The initial value to assign.
+     * @param builder the builder class to initialize this instance
      */
-    private CbaBoolean(long v) {
-        super(1, false);
-        assign(v);
+    private CbaBoolean(Builder builder) {
+        super(builder);
+        clearField();
     }
-
+    
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(long)
+
     /**
-     * Assign a new value to {@link CbaTinyInt#value}.  Since a boolean can only store true and false values, we
-     * take an approach from C and C++ where {@code 0} is {@link #FALSE} and any other non-zero value is 
-     * {@link #TRUE}.  This function ensures that the only 2 possible values are {@link #FALSE} and {@link #TRUE}.
-     * 
-     * @param v The new value to assign to the boolean.
+     * Trim a long value to the boolean values of 0 or 1.
      */
-    @Override
-    public void assign(long v) {
-        if (v == 0) super.assign(0);
-        else super.assign(1);
+    void trim() {
+        if (getValue() == 0) setValue(0);
+        else setValue(1);
     }
 
 
@@ -95,7 +118,7 @@ class CbaBoolean extends CbaTinyInt {
      * This function ensures that the only 2 possible values are {@link #FALSE} and {@link #TRUE}.
      * <p>
      * This function is more complicated since we can effectively take any value representation as a string.  
-     * {@code "true"} and {@code "false"} are trivial to handle, even in mixed case.  Even numbers such as 
+     * {@code "TRUE"} and {@code "FALSE"} are trivial to handle, even in mixed case.  Even numbers such as 
      * {@code "0"} and {@code "1"} are easy to handle.  However, real numbers such as {@code "3.14"} get problematic
      * since they cannot be cleanly converted to an integer.  So, I have to convert those to a double and then
      * extract out the integer part -- at which point the value {@code "0.234"} will evaluate to {@link #FALSE}.
@@ -103,7 +126,6 @@ class CbaBoolean extends CbaTinyInt {
      * Another problematic scenario is to convert the value {@code "Bob"} to a boolean value.  Anything that cannot
      * be properly converted to an integer or a real value will be treated as {@link #FALSE}.
      */
-    @Override
     public void assign(String v) {
         if (null == v) {
             super.assign(0);
@@ -142,20 +164,19 @@ class CbaBoolean extends CbaTinyInt {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // equals(Object)
+
     /**
      * Determine the equality of this instance against a generic object passed in.  This is particularly easy to 
      * implement since we will only allow CbaBoolean to be compared to CbaBoolean.
      */
-    @Override
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (this.getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (this.getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaTinyInt)o).getValue() == getValue());
+        return (((CbaBoolean)obj).getValue() == getValue());
     }
 
 
@@ -164,9 +185,26 @@ class CbaBoolean extends CbaTinyInt {
     /**
      * Return a {@link String} representation of this instance in the form {@code "false"} or {@code "true"}.
      */
-    @Override
     public String toString() {
-        if (getValue() == 0) return "false";
-        else return "true";
+        if (getValue() == 0) return "FALSE";
+        else return "TRUE";
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+    // toCreateSpec()
+    /**
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
+     * 
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
+     */
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
+        }
+
+        return getFieldName() + " BOOLEAN";
     }
 }

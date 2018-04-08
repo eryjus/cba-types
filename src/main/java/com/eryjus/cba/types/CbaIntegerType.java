@@ -16,8 +16,10 @@
 
 package com.eryjus.cba.types;
 
+import org.apache.logging.log4j.LogManager;
+
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaIntegerType:
+
 /**
  * An abstract implementation of an integer as represented in MySQL. 
  * 
@@ -25,35 +27,75 @@ package com.eryjus.cba.types;
  * @since v0.1.0
  */
 abstract class CbaIntegerType extends CbaType {
-    //---------------------------------------------------------------------------------------------------------------
-    // static final int DEFAULT_SIZE:
-    /**
-     * The default display size for an integer.
-     */
-    final static int DEFAULT_SIZE = 10;
+    static abstract class Builder<T extends CbaType.Builder<T>> extends CbaType.Builder<T> {
+        private boolean zeroFill = false;
+        private long minVal = 0;
+        private long maxVal = 0;
+        private int size = 0;
+
+        
+        /**
+         * Set the display size of the integer builder
+         */
+        public T setSize(int sz) {
+            size = sz;
+            return getThis();
+        }
 
 
-    //---------------------------------------------------------------------------------------------------------------
-    // static final String ZEROS:
+        /**
+         * Set the zeroFill attribute of the integer builder.
+         */
+        public T setZeroFill(boolean zf) {
+            zeroFill = zf;
+            return getThis();
+        }
+
+        
+        /**
+         * set the minimum value for this integer builder.
+         */
+        public T setMinVal(long val) {
+            minVal = val;
+            return getThis();
+        }
+
+
+        /**
+         * set the maximum value for this integer builder.
+         */
+        public T setMaxVal(long val) {
+            maxVal = val;
+            return getThis();
+        }
+    }
+
+
     /**
      * For integers that are zer filled, this is a string of zeros that will be used to fill the left side of the
      * integer.  This string is big enough to cover the largest permitted decimal number.
      */
-    static final String ZEROS = "00000000000000000000000000000000000000000000000000000000000000000";
+    private static final String ZEROS = "00000000000000000000000000000000000000000000000000000000000000000";
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private final int SIZE:
+
     /**
-     * For integers that are zer filled, this is a string of zeros that will be used to fill the left side of the
-     * integer.  This string is big enough to cover the largest permitted decimal number.  If the number of digits
-     * to print is more then SIZE or {@link #ZERO_FILL} is false, then SIZE has no effect.
+     * The default display size for an integer.
      */
-    private final int SIZE;
+    static final int DEFAULT_SIZE = 10;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private final boolean ZERO_FILL:
+
+    /**
+     * The default value for an integer type
+     */
+    static final String DEFAULT_VALUE = "0";
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * When outputting this integer, zero fill to the left of the most significant digit until {@link #SIZE} digits 
      * have been printed?
@@ -62,76 +104,220 @@ abstract class CbaIntegerType extends CbaType {
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaIntegerType():
+
     /**
-     * The default Constructor, not unsigned and not zero filled.
+     * The minimum value allowed for this particular object.
      */
-    protected CbaIntegerType() {
-        super();
-        SIZE = DEFAULT_SIZE;
-        ZERO_FILL = false;
-    }
+    private final long MIN_VALUE;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaIntegerType(int, boolean):
+
     /**
-     * Create a variable-like instance with these attributes.  This instance will not be bound to a database field.
+     * The maximum value allowed for this particular object.
+     */
+    private final long MAX_VALUE;
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The minimum number of printed digits.  This value does not specify the maximum number of printed digits.  Nor
+     * does it have any impact on the values that can be stored in the integer.
+     */
+    private final int SIZE;
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The actual value of the element.
+     */
+    private long value;
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Construct a new CbaCharType with the indicated size.
      * 
-     * @param s The display size when printing this value. See also {@link #SIZE}.
-     * @param z Is the instance a zero-filled integer? 
+     * @param builder The builder class from which this instance will be built.
      */
-    protected CbaIntegerType(int s, boolean z) {
-        super();
-        SIZE = s;
-        ZERO_FILL = z;
+    CbaIntegerType(Builder<?> builder) {
+        super(builder);
+        MIN_VALUE = builder.minVal;
+        MAX_VALUE = builder.maxVal;
+        SIZE = builder.size;
+        ZERO_FILL = builder.zeroFill;
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaIntegerType(String, String, int, boolean):
+
     /**
-     * Create a database field instance with these attributes.  This instance is bound to a database field.
+     * Zero fill a string representation of the integer to a minimum of {@link #SIZE} digits.  This function does 
+     * not check the validity of the integer; it merely prepends zeros to the left to the minimum size.
      * 
-     * @param tbl The table to which this field is bound.
-     * @param fld The field in the table to which this field is bound.
-     * @param s The display size when printing this value. See also {@link #SIZE}.
-     * @param z Is the instance a zero-filled integer? 
+     * @param val The integer representation of the integer to fill.
+     * @return A zero-filled integer.
      */
-    protected CbaIntegerType(String tbl, String fld, int s, boolean z) {
-        super(tbl, fld);
-        SIZE = s;
-        ZERO_FILL = z;
+    final String fillWithZeros(final String val) {
+        boolean isNeg = false;
+        String wrk = val;
+
+        if (val.charAt(0) == '-') {
+            isNeg = true;
+            wrk = wrk.substring(1);
+        } else if (wrk.charAt(wrk.length() - 1) == '-') {
+            isNeg = true;
+            wrk = wrk.substring(0, wrk.length() - 1);
+        }
+
+        // If the cleaned up length is good (less any '-' char), return the original value
+        if (wrk.length() >= SIZE) return val;
+
+        String rv = ZEROS + val;
+        rv = wrk.substring(wrk.length() - SIZE);
+        if (isNeg) rv = "-" + rv;
+        return rv;
+    }
+
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Assign a new {@link CbaType} value to {@link #value}.  This is done by first converting the {@link CbaType} 
+     * to a {@code long}.  Then, {@link #trim()} the value and then set the field to be dirty.
+     * 
+     * @param val The CBA value to assign.
+     */
+    public final void assign(CbaType val) {
+        assign(val.toString());
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // isZeroFill():
+
+    /**
+     * Assign a new long value to {@link #value}.  Then, {@link #trim()} the value and then set the field to be 
+     * dirty.
+     * 
+     * @param val The value to assign.
+     */
+    final public void assign(long val) {
+        if (isReadOnly()) {
+            LogManager.getLogger(this.getClass()).warn("Unable to assign to a read-only field; ignoring assignment");
+            return;
+        }
+
+        value = val;
+        trim();
+        setDirty();
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Assign a new {@link Number} value to {@link #value}.  This is done by first converting the {@link Number} 
+     * to a {@code long}.  Then, {@link #trim()} the value and then set the field to be dirty.
+     * 
+     * @param v The Java numeric value to assign.
+     */
+    public final void assign(Number val) {
+        assign(val.longValue());
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Convert this value to a string representation, carefully taking care of signed numbers and zero-filled 
+     * numbers.
+     * 
+     * @return A String representation of {@link #value}.
+     */
+    public String toString() {
+        String rv = new Long(getValue()).toString();
+
+        if (rv.length() >= getSize() || !isZeroFill()) {
+            return rv;
+        } else {
+            return fillWithZeros(rv);
+        }
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
      * The access method for the {@link #ZERO_FILL} attribute.
      * 
      * @return Whether this instance is zero filled.
      */
-    public boolean isZeroFill() { return ZERO_FILL; }
+    final public boolean isZeroFill() { return ZERO_FILL; }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // getSize():
+
     /**
      * The access method for the {@link #SIZE} attribute.
      * 
      * @return The minimum display size for this instance.  See also {@link #SIZE}.
      */
-    public int getSize() { return SIZE; }
+    final public int getSize() { return SIZE; }
 
 
-    //---------------------------------------------------------------------------------------------------------------    
-    // abstract assign(String):
+    //---------------------------------------------------------------------------------------------------------------
+
     /**
-     * Perform an assignment from a String value.
+     * The access method for the actual value of this object.
      * 
-     * @param v A String representation of the value to assign to the Cbe Type.
+     * @return The value of this instance
      */
-    @Override
-    abstract public void assign(String v);
+    public final long getValue() { 
+        return value; 
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The access method for the actual value of this object.
+     * 
+     * @param val The new value of this instance
+     */
+    public final void setValue(long val) { 
+        value = val; 
+    }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The access method for the minimum value of this object.
+     * 
+     * @return The minimum value allowed for this instance
+     */
+    public long getMinValue() { return MIN_VALUE; }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * The access method for the maximum value of this object.
+     * 
+     * @return The maximum value allowed for this instance
+     */
+    public long getMaxValue() { return MAX_VALUE; }
+
+
+    //---------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Trim the newly assigned {@link #value} to 8-bits.  This critical function must distinguish between signed and 
+     * unsigned numbers and manage the value properly.
+     */
+    abstract void trim();
 }

@@ -1,19 +1,24 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
     "cSpell.words": [
+        "BIGINT",
         "DATETIME",
         "LONGBLOB",
         "LONGTEXT",
+        "MEDIUMINT",
         "MEDIUMTEXT",
+        "SMALLINT",
         "TINYINT",
         "TINYTEXT",
         "classpath",
         "elemview",
+        "flds",
         "junit",
         "nano",
         "repo",
         "signum",
         "tzinfo",
+        "userid",
         "varchar",
         "zoneinfo"
     ]

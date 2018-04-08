@@ -18,7 +18,7 @@ package com.eryjus.cba.types;
 
 
 //-------------------------------------------------------------------------------------------------------------------
-// class CbaTemporalType:
+
 /**
  * This is the base real number class against which all other types will be defined.  It is intended to define the 
  * minimum requirements for operating on a real number in CBA.
@@ -27,36 +27,24 @@ package com.eryjus.cba.types;
  * @since v0.1.0
  */
 abstract class CbaTemporalType extends CbaType {
-    //---------------------------------------------------------------------------------------------------------------
-    // constructor CbaTemporalType():
+    static abstract class Builder<T extends Builder<T>> extends CbaType.Builder<T> {
+        // we add no additional fields at this point, so this is a trivial extension
+    }
     /**
-     * This is the default constructor for a real number.
+     * Construct the parent of the CbaTemporalType.
+     * 
+     * @param builder The class builder
      */
-    protected CbaTemporalType() {
-        super();
+    CbaTemporalType(Builder<?> builder) {
+        super(builder);
     }
 
 
-    //---------------------------------------------------------------------------------------------------------------    
-    // abstract equals():
     /**
-     * Inherited from the Object class but made abstract in this class, which will force it to be implemented in child 
-     * classes.
+     * Is this temporal value equivalent to a ZERO value?
      * 
-     * @param o The object against which to compare.
-     * @return Whether this element and the supplied object have the same meaning or content.
+     * @return Whether or not this date is equivalent to a ZERO value.  Note a zero value is a very valid normal 
+     * value in every case.
      */
-    @Override
-    public abstract boolean equals(Object o);
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // abstract assign(String):
-    /**
-     * Abstract method to update the value of this element
-     * 
-     * @param v The value to which the value of this element will be updated.
-     */
-    @Override
-    abstract public void assign(String v);
+    abstract public boolean isZero();
 }

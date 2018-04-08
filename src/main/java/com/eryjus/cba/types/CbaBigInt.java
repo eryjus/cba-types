@@ -20,6 +20,9 @@
 
 package com.eryjus.cba.types;
 
+import java.sql.SQLException;
+
+
 //-------------------------------------------------------------------------------------------------------------------
 // class CbaBigInt:
 /**
@@ -29,229 +32,118 @@ package com.eryjus.cba.types;
  * @since v0.1.0
  */
 class CbaBigInt extends CbaIntegerType {
-    //---------------------------------------------------------------------------------------------------------------
-    // private long value:
     /**
-     * The actual value of the element.
+     * This is the builder class for a small integer
      */
-    private long value;
+    static class Builder extends CbaIntegerType.Builder<Builder> {
+        Builder() {
+            setIndicatedType(CbaType.IndicatedType.CBA_SMALL_INT);
+            setSize(DEFAULT_SIZE);
+            setDefaultValue(DEFAULT_VALUE);
+            setMinVal(MIN);
+            setMaxVal(MAX);
+
+        }
+
+
+        /**
+         * Return this in the proper type
+         */
+        public Builder getThis() { return this; }
+
+        
+        /**
+         * Build a CbaBigInt from the builder setup
+         */
+        public CbaBigInt build() {
+            return new CbaBigInt(this);
+        }
+    }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private long minValue:
+
     /**
      * The minimum value allowed for this particular object.
      */
-    private static final long MIN_VALUE = Long.MIN_VALUE;
+    private static final long MIN = Long.MIN_VALUE;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // private long minValue:
+
     /**
      * The maximum value allowed for this particular object.
      */
-    private static final long MAX_VALUE = Long.MAX_VALUE;
+    private static final long MAX = Long.MAX_VALUE;
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(String, String, int, boolean):
+
     /**
      * This constructor will create an instance that is a database field and initialize it to the value "0".
      * 
-     * @param tbl The table name to which this field belongs.
-     * @param fld The field name to which this field belongs.
-     * @param sz The maximum number of display digits, which is only used with zero-filled integers.
-     * @param z Is the integer zero filled.
+     * @param builder the builder class from which to initialize this instance
      */
-    public CbaBigInt(String tbl, String fld, int sz, boolean z) {
-        super(tbl, fld, sz, z);
-        value = 0;
+    public CbaBigInt(Builder builder) {
+        super(builder);
+        setValue(0);
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(int, boolean):
+
     /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".
-     * 
-     * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     * @param z Is the integer zero filled.
+     * This is a trivial implementation to trim a 64-bit integer to 64-bits.  Obviously, there is nothing to do.
      */
-    public CbaBigInt(int s, boolean z) {
-        super(s, z);
-        value = 0;
-    }
+    void trim() {}
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(boolean):
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * 
-     * @param z Is the integer zero filled.
-     */
-    public CbaBigInt(boolean z) {
-        super(CbaIntegerType.DEFAULT_SIZE, z);
-        value = 0;
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt(int):
-    /**
-     * This constructor will create an instance that is a fixed size variable and initialize it to the value "0".  
-     * This constructor assumes that the variable is not zero filled.
-     * 
-     * @param s The maximum number of display digits, which is only used with zero-filled integers.
-     */
-    public CbaBigInt(int s) {
-        super(s, false);
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // CbaMediumInt():
-    /**
-     * This constructor will create an instance that is the default size variable and initialize it to the value "0".
-     * This constructor assumes that the variable is not zero filled.
-     */
-    public CbaBigInt() {
-        super();
-        value = 0;
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getValue():
-    /**
-     * The access method for the actual value of this object.
-     * 
-     * @return The value of this instance
-     */
-    public long getValue() { 
-        return value; 
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getMinValue():
-    /**
-     * The access method for the minimum value of this object.
-     * 
-     * @return The minimum value allowed for this instance
-     */
-    public long getMinValue() { return MIN_VALUE; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // getMaxValue():
-    /**
-     * The access method for the maximum value of this object.
-     * 
-     * @return The maximum value allowed for this instance
-     */
-    public long getMaxValue() { return MAX_VALUE; }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(long):
-    /**
-     * Assign a new long value to {@link #value}.  Then, set the field to be dirty.
-     * 
-     * @param v The value to assign.
-     */
-    public void assign(long v) {
-        value = v;
-        setDirty();
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(String):
     /**
      * Assign a new String value to {@link #value}.  This is done by first converting the String to a {@code long}. 
      * Then, set the field to be dirty.
      * 
      * @param v A String representation of the value to assign.
      */
-    @Override
     public void assign(String v) {
         assign(Long.valueOf(v));
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // assign(CbaType):
-    /**
-     * Assign a new {@link CbaType} value to {@link #value}.  This is done by first converting the {@link CbaType} 
-     * to a {@code long}.  Then, set the field to be dirty.
-     * 
-     * @param v The CBA value to assign.
-     */
-    public void assign(CbaType v) {
-        assign(v.toString());
-    }
 
-
-    //---------------------------------------------------------------------------------------------------------------
-    // assign(Number):
-    /**
-     * Assign a new {@link Number} value to {@link #value}.  This is done by first converting the {@link Number} 
-     * to a {@code long}.  Then, set the field to be dirty.
-     * 
-     * @param v The Java numeric value to assign.
-     */
-    public void assign(Number v) {
-        assign(v.longValue());
-    }
-
-
-    //---------------------------------------------------------------------------------------------------------------
-    // equals(Object):
     /**
      * Determine equality by comparing the {@link Object} {@code o} to a boxed version of {@link #value}.
      * 
-     * @param o The object to which to compare this instance.
+     * @param obj The object to which to compare this instance.
      * @return Whether this instance and the object are equal.
      */
-    @Override
-    public boolean equals(Object o) {
-        if (null == o) return false;
-        if (this == o) return true;
-        if (getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (null == obj) return false;
+        if (this == obj) return true;
+        if (getClass() != obj.getClass()) {
             return false;
         }
 
-        return (((CbaBigInt)o).value == value);
+        return (((CbaBigInt)obj).getValue() == getValue());
     }
 
 
     //---------------------------------------------------------------------------------------------------------------
-    // toString():
+
     /**
-     * Convert this value to a string representation, carefully taking care of signed numbers and zero-filled 
-     * numbers.
+     * Create a spec for the field to be used in a {@code CREATE TABLE} specification, returning the specific clause
+     * for this field in the column specifications.
      * 
-     * @return A String representation of {@link #value}.
+     * @return The column spec clause for this field.
+     * @throws SQLException When the field name is empty since the field must have a name.
      */
-    @Override
-    public String toString() {
-        String rv = new Long(value).toString();
-
-        if (rv.length() >= getSize() || !isZeroFill()) {
-            return rv;
-        } else if (value < 0) {
-            rv = new Long(-value).toString();
-            String wrk = (ZEROS + rv);
-            rv = "-" + wrk.substring(wrk.length() - getSize());
-
-            return rv;
-        } else {
-            String wrk = (ZEROS + rv);
-            rv = wrk.substring(wrk.length() - getSize());
-
-            return rv;
+    public String toCreateSpec() throws SQLException {
+        if (getFieldName().isEmpty()) {
+            throw new SQLException("Field name is not set; cannot create a table spec from a variable");
         }
+
+        return getFieldName() + " BIGINT(" + getSize() + ")";
     }
 }

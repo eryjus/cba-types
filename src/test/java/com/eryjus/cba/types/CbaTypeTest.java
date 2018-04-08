@@ -3,6 +3,8 @@ package com.eryjus.cba.types;
 import static org.junit.Assert.*;
 import org.junit.*;
 
+import com.eryjus.cba.tables.*;
+/*
 
 public class CbaTypeTest {
     @Test
@@ -124,15 +126,12 @@ public class CbaTypeTest {
 
     @Test
     public void SQLTest001() throws Exception {
-        final String  ELEMENTS = "elements";
-        CbaVarchar element_name = new CbaVarchar(ELEMENTS, "element_name", 64);
-        CbaTinyText element_description = new CbaTinyText(ELEMENTS, "element_description");
+        final CbaElements elem = new CbaElements();
 
-        String sql = "CREATE TABLE " + ELEMENTS + " (" +
-                element_name.toCreateSpec() + ", " +
-                element_description.toCreateSpec() + 
-            ")";
-
+        String sql = elem.toCreateSpec();
+        
         System.out.println(sql);
     }
 }
+
+*/
